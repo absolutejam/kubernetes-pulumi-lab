@@ -63,3 +63,29 @@ pulumi config set-all --path \
   --plaintext "web-app.image"="nginx" \
   --plaintext "web-app.replicas"="2"
 ```
+
+## Resources
+
+It will current spin up a web app per environment.
+
+The following `pulumi` output is generated using environments `production` and `staging`:
+
+```
+     Type                                                        Name                                      Plan     Info
+     pulumi:pulumi:Stack                                         kubernetes-lab-dev                                 
+     ├─ kubernetes:core/v1:Namespace                             webapp-production-namespace                        
+     │  ├─ kubernetes:traefik.containo.us/v1alpha1:Middleware    webapp-production-strip-environment-path           
+     │  ├─ kubernetes:core/v1:ConfigMap                          webapp-production-config                           
+     │  ├─ kubernetes:traefik.containo.us/v1alpha1:IngressRoute  webapp-production-ingressroute                     
+     │  ├─ kubernetes:core/v1:Service                            webapp-production-service                          
+     │  └─ kubernetes:apps/v1:Deployment                         webapp-production-deployment                       
+     └─ kubernetes:core/v1:Namespace                             webapp-staging-namespace                           
+        ├─ kubernetes:traefik.containo.us/v1alpha1:Middleware    webapp-staging-strip-environment-path              
+        ├─ kubernetes:core/v1:Service                            webapp-staging-service                             
+        ├─ kubernetes:core/v1:ConfigMap                          webapp-staging-config                              
+        ├─ kubernetes:traefik.containo.us/v1alpha1:IngressRoute  webapp-staging-ingressroute                        
+        └─ kubernetes:apps/v1:Deployment                         webapp-staging-deployment                          
+```
+
+  - Hit the **production** instance at `http://localhost:8090/production`
+  - Hit the **staging** instance at `http://localhost:8090/staging`
