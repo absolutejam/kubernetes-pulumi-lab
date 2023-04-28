@@ -165,7 +165,7 @@ http {
         },
     }, { parent: namespace, dependsOn: [deployment] });
 
-    const middlewareName = `webapp-${environment}`
+    const middlewareName = `strip-environment-${environment}-path`
     const stripEnvironmentPathMiddleware = new Middleware(`webapp-${environment}-strip-environment-path`, {
         metadata: {
             name: middlewareName,
@@ -173,7 +173,7 @@ http {
         },
         spec: {
             stripPrefix: { prefixes: [`/${environment}`] }
-        }
+        },
     }, { parent: namespace })
 
     const ingressRoute = new IngressRoute(`webapp-${environment}-ingressroute`, {
@@ -202,8 +202,8 @@ http {
                         },
                     ],
                 },
-            ]
-        }
+            ],
+        },
     }, { parent: namespace, dependsOn: [deployment, service, stripEnvironmentPathMiddleware] })
 
     return { namespace, configMap, deployment, service, ingressRoute, middlewares: [stripEnvironmentPathMiddleware] }
