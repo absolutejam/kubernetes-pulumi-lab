@@ -1,0 +1,16 @@
+{
+  "name": "kubernetes-lab-k6",
+  "version": "1.0.0",
+  "description": "k6 scripts",
+  "main": "index.js",
+  "scripts": {
+    "transpile": "tsc",
+    "transpile:watch": "tsc -w"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/k6": "^0.44.0",
+    "typescript": "^5.0.4"
+  }
+}

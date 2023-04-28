@@ -1,0 +1,9 @@
+encryptionsalt: v1:iXyKYoivYr0=:v1:+0DRbNQlnc01U6It:9Vvv4SzNPKLsZdxXat1CH0xCoP8h6Q==
+config:
+  kubernetes-lab:environments:
+    - staging
+    - production
+  kubernetes-lab:web-app:
+    image: nginx
+    replicas: 2
+  kubernetes:cluster: k3d-local-lab

@@ -1,0 +1,20 @@
+#!/usr/bin/env sh
+
+if [ "${SHELL}" == "true" ]; then
+    ENTRYPOINT="--entrypoint sh"
+else
+    ENTRYPOINT=
+fi
+
+set -x
+
+docker run \
+    -it \
+    --rm \
+    --name k6 \
+    --network host \
+    -v ${PWD}/dist:/scripts \
+    ${ENTRYPOINT} \
+    --workdir /scripts \
+    grafana/k6 \
+    "${@}"
