@@ -37,8 +37,8 @@ on your system.
 
   ```bash
   OUT=./src/crds/source
-  kubectl get crd ingressroutes.traefik.containo.us -o yaml > ${OUT}/ingressroutes.yaml
-  kubectl get crd middlewares.traefik.containo.us -o yaml   > ${OUT}/middlewares.yaml
+  kubectl --context=${K8S_CLUSTER} get crd ingressroutes.traefik.containo.us -o yaml > ${OUT}/ingressroutes.yaml
+  kubectl --context=${K8S_CLUSTER} get crd middlewares.traefik.containo.us -o yaml   > ${OUT}/middlewares.yaml
   ```
 
 - Generate the Pulumi CRD definitions:
