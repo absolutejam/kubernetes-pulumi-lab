@@ -17,16 +17,32 @@ k3d cluster create ${K3D_CLUSTER} \
   -p "8090:80@loadbalancer"
 ```
 
-## Usage
+## Setup
 
-- State is stored locally since this is just for a lab
+  - Pull dependencies
 
-  ```bash
-  pulumi login file://$(PWD)/.state
-  export PULUMI_CONFIG_PASSPHRASE='waffle123!'
-  ```
+    ```bash
+    npm install
+    ```
 
-## Generating Traefik CRDs
+  - Set up Pului state 
+  
+    NOTE: State is stored locally since this is just for a lab
+
+    ```bash
+    pulumi login file://$(PWD)/.state
+    export PULUMI_CONFIG_PASSPHRASE='waffle123!'
+    ```
+
+  - Initialise the `dev` stack (Because the state is not tracked)
+
+  - Select the `dev` stack
+
+    ```bash
+    pulumi stack select dev
+    ```
+
+## (Re)Generating Traefik CRDs
 
 By default, `k3d` ships with Traefik installed in the cluster.
 
@@ -51,7 +67,7 @@ on your system.
       ${OUT}/ingressroutes.yaml ${OUT}/middlewares.yaml
   ```
 
-## Config
+## Stack config
 
 ```bash
 pulumi config set-all --path \
