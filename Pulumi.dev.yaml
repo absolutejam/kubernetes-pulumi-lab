@@ -3,6 +3,16 @@ config:
   kubernetes-lab:environments:
     - staging
     - production
+  kubernetes-lab:ingress:
+    install: true
+    labels: |-
+      {
+      "istio": "ingressgateway"
+      }
+    namespace: istio-system
+    type: istio
+  kubernetes-lab:kubernetes-dashboard:
+    namespace: kubernetes-dashboard
   kubernetes-lab:web-app:
     image: nginx
     replicas: 2

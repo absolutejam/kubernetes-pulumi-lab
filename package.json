@@ -5,6 +5,7 @@
         "@types/node": "^16"
     },
     "dependencies": {
+        "@pulumi/command": "^0.7.2",
         "@pulumi/kubernetes": "3.21.4",
         "@pulumi/pulumi": "^3.0.0",
         "prettier": "^2.8.8",
@@ -13,5 +14,5 @@
     },
     "scripts": {
         "lint": "prettier '**/*.ts' -w"
-      }
+    }
 }

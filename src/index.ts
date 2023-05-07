@@ -1,27 +1,51 @@
+import * as pulumi from "@pulumi/pulumi";
+
 import { config } from "./config";
+import { ingress, kubernetesDashboard, webApps } from "./resources";
+import { withIngress } from "./builders/ingress";
 
-import {
-  buildWebServiceResources,
-  type WebServiceResources,
-} from "./builders/web-app";
+export const ingressDetails = withIngress(ingress, {
+  istio: (istio) => {
+    return {
+      istioBaseVersion: istio.istioBase.version,
+      istiodVersion: istio.istiod.version,
+    };
+  },
+  traefik: (traefik) => {
+    return {
+      namespace: traefik.namespace,
+    };
+  },
+});
 
-import * as priorityClasses from "./resources/shared/priority-class";
+// This is not pretty!
+export const webAppRoutes = webApps.flatMap(({ networkResources }) => {
+  const routes: pulumi.Output<string[]> = withIngress(networkResources, {
+    traefik: (traefik): pulumi.Output<string[]> => {
+      const routes = traefik.ingressRoute.spec.routes.apply((r) =>
+        r.flatMap((r) => r.match)
+      );
+      return routes ?? pulumi.Output.create([]);
+    },
 
-const webServices: [string, WebServiceResources][] = config.environments.map(
-  (environment) => {
-    const resources = buildWebServiceResources(environment);
-    return [environment, resources];
-  }
-);
+    istio: (istio): pulumi.Output<string[]> => {
+      const routes = istio.virtualService.spec.apply(
+        (r) =>
+          r?.http?.flatMap((http) => http.match?.flatMap((m) => m.uri) ?? []) ??
+          []
+      );
+      return routes ?? pulumi.Output.create([]);
+    },
+  });
 
-const deploy = [webServices, priorityClasses];
+  return routes;
+}).flat;
 
 export const cluster = config.cluster;
-export const webServiceEntrypoints = Object.fromEntries(
-  webServices.map(([environment, { ingressRoute }]) => {
-    const matches = ingressRoute.spec.routes.apply((r) =>
-      r.map((r) => r.match)
-    );
-    return [environment, matches];
-  })
-);
+export const dashboardToken = kubernetesDashboard
+  ? pulumi.unsecret(
+      kubernetesDashboard.tokenSecret.data.apply(({ token }) =>
+        Buffer.from(token, "base64").toString("utf-8")
+      )
+    )
+  : undefined;

@@ -1,6 +1,6 @@
 import * as pulumi from "@pulumi/pulumi";
 
-import { Config, WebAppConfig } from "./types";
+import { Config, IngressConfig, WebAppConfig } from "./types";
 
 const k8sConfig = new pulumi.Config("kubernetes");
 const cluster = k8sConfig.require("cluster");
@@ -14,13 +14,7 @@ export const config = Config.parse({
   instance,
   environments,
 
-  traefik: {
-    namespace: "kube-system",
-    labels: {
-      "app.kubernetes.io/name": "traefik",
-      "app.kubernetes.io/instance": "traefik",
-    },
-  },
-
-  webAppConfig: pulumiConfig.requireObject<WebAppConfig>("web-app"),
+  ingress: pulumiConfig.requireObject("ingress"),
+  webApp: pulumiConfig.requireObject("web-app"),
+  kubernetesDashboard: pulumiConfig.getObject("kubernetes-dashboard")
 } as Config);
