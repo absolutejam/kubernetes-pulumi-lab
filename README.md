@@ -175,6 +175,18 @@ pulumi config set-all --path \
       }'
   ```
 
+## Layout
+
+This is a monolithic Pulumi project, designed to spin up an entire cluster
+with all required resources.
+
+  - `config.ts` - Parses and exposes type-safe config
+  - `builders/` - Contains `ComponentResource`s & functions to build other 
+    resources.
+  - `resources/` - This is where all of the resources are constructed, using
+    values from the config, the builders, and dependent resources.
+  - `index.ts` - Imports resources and exports outputs
+
 ## Resources
 
 ```
