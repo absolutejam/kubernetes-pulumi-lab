@@ -191,58 +191,86 @@ with all required resources.
 ## Resources
 
 ```
-    TYPE                                                                    NAME
-    pulumi:pulumi:Stack                                                     kubernetes-lab-dev
-    │ 
-    ├─ k8slab:infra:Istio                                                   istio
-    │  ├─ kubernetes:core/v1:Namespace                                      istio-namespace
-    │  │  ├─ kubernetes:helm.sh/v3:Chart                                  istio-base
-    │  │  ├─ kubernetes:helm.sh/v3:Chart                                  istiod
-    │  │  ├─ kubernetes:helm.sh/v3:Chart                                  istio-gateway
-    │  │  └─ kubernetes:networking.istio.io/v1beta1:Gateway                 istio-ingress-gateway
-    │  └─ k8slab:infra:IstioPrometheusAddon                                 istio-prometheus
-    │     └─ kubernetes:yaml:ConfigFile                                     prometheus-addon
-    │        ├─ kubernetes:rbac.authorization.k8s.io/v1:ClusterRoleBinding  prometheus
-    │        ├─ kubernetes:rbac.authorization.k8s.io/v1:ClusterRole         prometheus
-    │        ├─ kubernetes:core/v1:ConfigMap                                istio-system/prometheus
-    │        ├─ kubernetes:core/v1:ServiceAccount                           istio-system/prometheus
-    │        ├─ kubernetes:apps/v1:Deployment                               istio-system/prometheus
-    │        └─ kubernetes:core/v1:Service                                  istio-system/prometheus
-    │ 
-    ├─ k8slab:infra:PriorityClasses                                         priority-classes
-    │  └─ kubernetes:scheduling.k8s.io/v1:PriorityClass                     business-critical
-    │ 
-    ├─ k8slab:infra:KubernetesDashboard                                     dashboard
-    │  └─ kubernetes:core/v1:Namespace                                      dashboard-namespace
-    │     ├─ kubernetes:core/v1:ServiceAccount                              dashboard-service-account
-    │     ├─ kubernetes:helm.sh/v3:Chart                                  dashboard
-    │     ├─ kubernetes:rbac.authorization.k8s.io/v1:ClusterRoleBinding     dashboard-cluster-role-binding
-    │     └─ kubernetes:core/v1:Secret                                      service-account-token
-    │ 
-    ├─ k8slab:app:WebApp                                                    web-app-production
-    │  ├─ k8slab:app:WebAppIstioRoutes                                      web-app-production
-    │  │  └─ kubernetes:networking.istio.io/v1beta1:VirtualService          web-app-production-virtualservice
-    │  └─ kubernetes:core/v1:Namespace                                      web-app-production-namespace
-    │     ├─ kubernetes:core/v1:ConfigMap                                   web-app-production-config
-    │     ├─ kubernetes:core/v1:ResourceQuota                               web-app-production
-    │     ├─ kubernetes:core/v1:LimitRange                                  web-app-production-limits
-    │     ├─ kubernetes:apps/v1:Deployment                                  web-app-production-deployment
-    │     │  └─ kubernetes:policy/v1:PodDisruptionBudget                    web-app-production-pdb
-    │     └─ kubernetes:core/v1:Service                                     web-app-production-service
-    │ 
-    ├─ k8slab:app:WebApp                                                    web-app-staging
-    │  ├─ k8slab:app:WebAppIstioRoutes                                      web-app-staging
-    │  │  └─ kubernetes:networking.istio.io/v1beta1:VirtualService          web-app-staging-virtualservice
-    │  └─ kubernetes:core/v1:Namespace                                      web-app-staging-namespace
-    │     ├─ kubernetes:core/v1:ConfigMap                                   web-app-staging-config
-    │     ├─ kubernetes:core/v1:LimitRange                                  web-app-staging-limits
-    │     ├─ kubernetes:core/v1:ResourceQuota                               web-app-staging
-    │     ├─ kubernetes:apps/v1:Deployment                                  web-app-staging-deployment
-    │     │  └─ kubernetes:policy/v1:PodDisruptionBudget                    web-app-staging-pdb
-    │     └─ kubernetes:core/v1:Service                                     web-app-staging-service
-    │ 
-    ├─ pulumi:providers:kubernetes                                          default_3_21_4
-    └─ pulumi:providers:kubernetes                                          default
+   TYPE                                                                                   NAME
+    pulumi:pulumi:Stack                                                                    kubernetes-lab-dev
+    ├─ k8slab:infra:Istio                                                                  istio
+    │  └─ kubernetes:core/v1:Namespace                                                     istio-namespace
+    │     ├─ kubernetes:helm.sh/v3:Chart                                                   istiod
+    │     │  └─ Resources omitted
+    │     │  
+    │     ├─ kubernetes:helm.sh/v3:Chart                                                   istio-base
+    │     │  └─ Resources omitted
+    │     │  
+    │     ├─ kubernetes:helm.sh/v3:Chart                                                   istio-gateway
+    │     │  └─ Resources omitted
+    │     │  
+    │     └─ kubernetes:networking.istio.io/v1beta1:Gateway                                istio-ingress-gateway
+    ├─ k8slab:infra:PriorityClasses                                                        priority-classes
+    │  └─ kubernetes:scheduling.k8s.io/v1:PriorityClass                                    business-critical
+    ├─ k8slab:infra:KubernetesDashboard                                                    dashboard
+    │  └─ kubernetes:core/v1:Namespace                                                     dashboard-namespace
+    │     ├─ kubernetes:helm.sh/v3:Chart                                                   dashboard
+    │     │  └─ Resources omitted
+    │     │  
+    │     ├─ kubernetes:core/v1:ServiceAccount                                             dashboard-service-account
+    │     ├─ kubernetes:core/v1:Secret                                                     service-account-token
+    │     └─ kubernetes:rbac.authorization.k8s.io/v1:ClusterRoleBinding                    dashboard-cluster-role-binding
+    ├─ k8slab:infra:PrometheusStack                                                        prometheus-stack
+    │  └─ k8slab:infra:PrometheusStackIstio                                                prometheus-stack
+    │     └─ kubernetes:networking.istio.io/v1beta1:VirtualService                         prometheus-virtualservice
+    │        
+    │  └─ kubernetes:core/v1:Namespace                                                     observability
+    │     └─ kubernetes:helm.sh/v3:Chart                                                   prometheus-stack
+    │        └─ Resources omitted
+    │        
+    ├─ k8slab:app:WebApp                                                                   web-app-staging
+    │  ├─ k8slab:app:WebAppIstioRoutes                                                     web-app-staging
+    │  │  └─ kubernetes:networking.istio.io/v1beta1:VirtualService                         web-app-staging-virtualservice
+    │  └─ kubernetes:core/v1:Namespace                                                     web-app-staging-namespace
+    │     ├─ kubernetes:core/v1:ResourceQuota                                              web-app-staging
+    │     ├─ kubernetes:core/v1:ConfigMap                                                  web-app-staging-config
+    │     ├─ kubernetes:core/v1:LimitRange                                                 web-app-staging-limits
+    │     ├─ kubernetes:apps/v1:Deployment                                                 web-app-staging-deployment
+    │     │  └─ kubernetes:policy/v1:PodDisruptionBudget                                   web-app-staging-pdb
+    │     └─ kubernetes:core/v1:Service                                                    web-app-staging-service
+    │        
+    ├─ k8slab:app:WebApp                                                                   web-app-production
+    │  ├─ k8slab:app:WebAppIstioRoutes                                                     web-app-production
+    │  │  └─ kubernetes:networking.istio.io/v1beta1:VirtualService                         web-app-production-virtualservice
+    │  └─ kubernetes:core/v1:Namespace                                                     web-app-production-namespace
+    │     ├─ kubernetes:core/v1:LimitRange                                                 web-app-production-limits
+    │     ├─ kubernetes:core/v1:ResourceQuota                                              web-app-production
+    │     ├─ kubernetes:core/v1:ConfigMap                                                  web-app-production-config
+    │     ├─ kubernetes:apps/v1:Deployment                                                 web-app-production-deployment
+    │     │  └─ kubernetes:policy/v1:PodDisruptionBudget                                   web-app-production-pdb
+    │     └─ kubernetes:core/v1:Service                                                    web-app-production-service
+    │        
+    ├─ pulumi:providers:kubernetes                                                         default_3_21_4
+    └─ pulumi:providers:kubernetes                                                         default
 ```
 
-*(With added spacing)*
+
+## Misc
+
+### Monitoring
+
+This project leverages the `kube-prometheus-stack` Helm chart to deploy multiple
+components (Prometheus operator, Prometheus instance, Grafana, etc.).
+
+
+#### Discovering pods that are discoverable by Prometheus
+
+This will find any pods with annotations containing `prometheus` in them. 
+
+Namely, we are looking for `prometheus.io/scrape` and `prometheus.io/port`.
+`
+```bash
+ kubectl get svc -A -o json | jq '
+.items[]
+| select(.metadata.annotations // {} | to_entries | map(.key) | any(. | test(".*prometheus.*")))
+| {
+    name: .metadata.name,
+    namespace: .metadata.namespace,
+    annotations: .metadata.annotations
+  }
+'
