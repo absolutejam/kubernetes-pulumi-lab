@@ -7,7 +7,7 @@ config:
     install: true
     labels: |-
       {
-      "istio": "ingressgateway"
+      "istio": "gateway"
       }
     namespace: istio-system
     type: istio

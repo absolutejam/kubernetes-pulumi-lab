@@ -49,6 +49,7 @@ k3d cluster create ${K3D_CLUSTER} \
 - Initialise the `dev` stack (Because the state is not tracked)
 
   ```bash
+  rm -rf .state/.pulumi || true
   pulumi stack init dev
   ```
 
@@ -145,7 +146,7 @@ pulumi config set-all --path \
 
 ```bash
 pulumi config set-all --path \
-  --plaintext "kubernetes-dashboard.namespace"="kubernetes-dashboard"
+  --plaintext "kubernetes-dashboard.enabled"="true"
 ```
 
 ### Ingress config
@@ -171,7 +172,7 @@ pulumi config set-all --path \
     --plaintext "ingress.install"="true" \
     --plaintext "ingress.namespace"="istio-system" \
     --plaintext "ingress.labels"='{
-        "istio": "ingressgateway"
+        "istio": "gateway"
       }'
   ```
 
@@ -195,9 +196,9 @@ with all required resources.
     │ 
     ├─ k8slab:infra:Istio                                                   istio
     │  ├─ kubernetes:core/v1:Namespace                                      istio-namespace
-    │  │  ├─ kubernetes:helm.sh/v3:Release                                  istio-base
-    │  │  ├─ kubernetes:helm.sh/v3:Release                                  istiod
-    │  │  ├─ kubernetes:helm.sh/v3:Release                                  istio-gateway
+    │  │  ├─ kubernetes:helm.sh/v3:Chart                                  istio-base
+    │  │  ├─ kubernetes:helm.sh/v3:Chart                                  istiod
+    │  │  ├─ kubernetes:helm.sh/v3:Chart                                  istio-gateway
     │  │  └─ kubernetes:networking.istio.io/v1beta1:Gateway                 istio-ingress-gateway
     │  └─ k8slab:infra:IstioPrometheusAddon                                 istio-prometheus
     │     └─ kubernetes:yaml:ConfigFile                                     prometheus-addon
@@ -214,7 +215,7 @@ with all required resources.
     ├─ k8slab:infra:KubernetesDashboard                                     dashboard
     │  └─ kubernetes:core/v1:Namespace                                      dashboard-namespace
     │     ├─ kubernetes:core/v1:ServiceAccount                              dashboard-service-account
-    │     ├─ kubernetes:helm.sh/v3:Release                                  dashboard
+    │     ├─ kubernetes:helm.sh/v3:Chart                                  dashboard
     │     ├─ kubernetes:rbac.authorization.k8s.io/v1:ClusterRoleBinding     dashboard-cluster-role-binding
     │     └─ kubernetes:core/v1:Secret                                      service-account-token
     │ 

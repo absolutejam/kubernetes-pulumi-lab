@@ -52,8 +52,18 @@ export const IngressConfig = z.discriminatedUnion("type", [
 export type IngressConfig = z.infer<typeof IngressConfig>;
 
 export const KubernetesDashboardConfig = z.object({
-  namespace: z.string(),
+  enabled: z.boolean().default(true),
+  namespace: z.string().default("kubernetes-dashboard"),
 });
+
+export type KubernetesDashboard = z.infer<typeof KubernetesDashboardConfig>;
+
+export const PrometheusStackConfig = z.object({
+  namespace: z.string().default("observability"),
+  version: z.string().optional(),
+});
+
+export type PrometheusStackConfig = z.infer<typeof PrometheusStackConfig>;
 
 export const Config = z.object({
   cluster: z.string(),
@@ -62,7 +72,8 @@ export const Config = z.object({
 
   ingress: IngressConfig,
   webApp: WebAppConfig,
-  kubernetesDashboard: KubernetesDashboardConfig.optional(),
+  kubernetesDashboard: KubernetesDashboardConfig.default({}),
+  prometheusStackConfig: PrometheusStackConfig.default({}),
 });
 
 export type Config = z.infer<typeof Config>;

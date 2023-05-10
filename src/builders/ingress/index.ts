@@ -1,5 +1,5 @@
 export { type TraefikResources, Traefik } from "./traefik";
-export { type IstioResources, Istio, IstioPrometheusAddon } from "./istio";
+export { type IstioResources, Istio } from "./istio";
 
 import { type Istio } from "./istio";
 import { type Traefik } from "./traefik";

@@ -9,10 +9,9 @@ export type IstioResources = {
   type: "istio";
   namespace: Namespace;
   gateway: Gateway;
-  prometheusAddon: IstioPrometheusAddon;
-  istioBase: kubernetes.helm.v3.Release;
-  istiod: kubernetes.helm.v3.Release;
-  istioGateway: kubernetes.helm.v3.Release;
+  istioBase: kubernetes.helm.v3.Chart;
+  istiod: kubernetes.helm.v3.Chart;
+  istioGateway: kubernetes.helm.v3.Chart;
 };
 
 export class Istio extends pulumi.ComponentResource implements IstioResources {
@@ -20,10 +19,9 @@ export class Istio extends pulumi.ComponentResource implements IstioResources {
 
   public namespace: Namespace;
   public gateway: Gateway;
-  public prometheusAddon: IstioPrometheusAddon;
-  public istioBase: kubernetes.helm.v3.Release;
-  public istiod: kubernetes.helm.v3.Release;
-  public istioGateway: kubernetes.helm.v3.Release;
+  public istioBase: kubernetes.helm.v3.Chart;
+  public istiod: kubernetes.helm.v3.Chart;
+  public istioGateway: kubernetes.helm.v3.Chart;
 
   constructor({ namespace, version, labels }: IstioConfig) {
     super("k8slab:infra:Istio", "istio", {}, {});
@@ -36,48 +34,53 @@ export class Istio extends pulumi.ComponentResource implements IstioResources {
       { parent: this }
     );
 
-    this.istioBase = new kubernetes.helm.v3.Release(
+    this.istioBase = new kubernetes.helm.v3.Chart(
       "istio-base",
       {
-        name: "istio-base",
-        description: "istio base",
         chart: "base",
         namespace: this.namespace.metadata.name,
         version,
-        repositoryOpts: {
+        repo: "istio",
+        fetchOpts: {
           repo: "https://istio-release.storage.googleapis.com/charts",
         },
-        values: {},
+        values: {
+          meshConfig: {
+            enablePrometheusMerge: true,
+          },
+        },
       },
       { parent: this.namespace, dependsOn: [this.namespace] }
     );
 
-    this.istiod = new kubernetes.helm.v3.Release(
+    this.istiod = new kubernetes.helm.v3.Chart(
       "istiod",
       {
-        name: "istiod",
-        description: "istiod",
         chart: "istiod",
         namespace: this.namespace.metadata.name,
         version,
-        repositoryOpts: {
+        repo: "istio",
+        fetchOpts: {
           repo: "https://istio-release.storage.googleapis.com/charts",
         },
-        values: {},
+        values: {
+          meshConfig: {
+            enablePrometheusMerge: true,
+          },
+        },
       },
       { parent: this.namespace, dependsOn: [this.namespace, this.istioBase] }
     );
 
-    this.istioGateway = new kubernetes.helm.v3.Release(
+    this.istioGateway = new kubernetes.helm.v3.Chart(
       "istio-gateway",
       {
-        name: "istio-gateway",
-        description: "istio-gateway",
         chart: "gateway",
         // TODO: Should this be a separate namespace, eg. `istio-ingress`?
         namespace: this.namespace.metadata.name,
         version,
-        repositoryOpts: {
+        repo: "istio",
+        fetchOpts: {
           repo: "https://istio-release.storage.googleapis.com/charts",
         },
         values: {},
@@ -85,6 +88,27 @@ export class Istio extends pulumi.ComponentResource implements IstioResources {
       {
         parent: this.namespace,
         dependsOn: [this.namespace, this.istioBase, this.istiod],
+        transformations: [
+          ({
+            props,
+            opts,
+          }: pulumi.ResourceTransformationArgs):
+            | pulumi.ResourceTransformationResult
+            | undefined => {
+            if (
+              props.kind === "Deployment" &&
+              props.metadata?.name === "istio-gateway"
+            ) {
+              props.metadata.annotations = {
+                "pulumi.com/skipAwait": "true",
+              };
+
+              return { props, opts };
+            }
+
+            return undefined;
+          },
+        ],
       }
     );
 
@@ -121,27 +145,6 @@ export class Istio extends pulumi.ComponentResource implements IstioResources {
         parent: this.namespace,
         dependsOn: [this.istioBase, this.istiod, this.istioGateway],
       }
-    );
-
-    this.prometheusAddon = new IstioPrometheusAddon({
-      parent: this,
-      dependsOn: [this.istioBase, this.istiod],
-    });
-  }
-}
-
-export class IstioPrometheusAddon extends pulumi.ComponentResource {
-  public prometheusAddon: kubernetes.yaml.ConfigFile;
-
-  constructor(opts?: pulumi.ComponentResourceOptions) {
-    super("k8slab:infra:IstioPrometheusAddon", "istio-prometheus", {}, opts);
-
-    this.prometheusAddon = new kubernetes.yaml.ConfigFile(
-      "prometheus-addon",
-      {
-        file: "https://raw.githubusercontent.com/istio/istio/release-1.17/samples/addons/prometheus.yaml",
-      },
-      { parent: this }
     );
   }
 }

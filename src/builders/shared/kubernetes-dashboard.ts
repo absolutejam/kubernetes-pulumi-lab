@@ -1,7 +1,7 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as kubernetes from "@pulumi/kubernetes";
 import { Namespace, Secret, ServiceAccount } from "@pulumi/kubernetes/core/v1";
-import { Release } from "@pulumi/kubernetes/helm/v3";
+import { Chart } from "@pulumi/kubernetes/helm/v3";
 import { ClusterRoleBinding } from "@pulumi/kubernetes/rbac/v1";
 
 export type KubernetesDashboardOpts = {
@@ -11,7 +11,7 @@ export type KubernetesDashboardOpts = {
 
 export class KubernetesDashboard extends pulumi.ComponentResource {
   public namespace: Namespace;
-  public release: Release;
+  public release: Chart;
   public serviceAccount: ServiceAccount;
   public clusterRoleBinding: ClusterRoleBinding;
   public tokenSecret: Secret;
@@ -41,14 +41,15 @@ export class KubernetesDashboard extends pulumi.ComponentResource {
       { parent: this }
     );
 
-    this.release = new kubernetes.helm.v3.Release(
+    this.release = new kubernetes.helm.v3.Chart(
       "dashboard",
       {
-        name: "kubernetes-dashboard",
-        description: "Kubernetes dashboard",
         chart: "kubernetes-dashboard",
         namespace: this.namespace.metadata.name,
-        repositoryOpts: { repo: "https://kubernetes.github.io/dashboard" },
+        repo: "kubernetes-dashboard",
+        fetchOpts: {
+          repo: "https://kubernetes.github.io/dashboard",
+        },
         values: {},
       },
       { parent: this.namespace, dependsOn: [this.namespace] }

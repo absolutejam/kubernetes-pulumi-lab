@@ -6,10 +6,7 @@ import { withIngress } from "./builders/ingress";
 
 export const ingressDetails = withIngress(ingress, {
   istio: (istio) => {
-    return {
-      istioBaseVersion: istio.istioBase.version,
-      istiodVersion: istio.istiod.version,
-    };
+    return {};
   },
   traefik: (traefik) => {
     return {
