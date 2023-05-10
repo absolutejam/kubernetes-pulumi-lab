@@ -72,6 +72,10 @@ export class Istio extends pulumi.ComponentResource implements IstioResources {
       { parent: this.namespace, dependsOn: [this.namespace, this.istioBase] }
     );
 
+    const istiodDeployment = this.namespace.metadata.name.apply((namespace) =>
+      this.istiod.getResource("apps/v1/Deployment", `${namespace}/istiod`)
+    );
+
     this.istioGateway = new kubernetes.helm.v3.Chart(
       "istio-gateway",
       {
@@ -87,8 +91,17 @@ export class Istio extends pulumi.ComponentResource implements IstioResources {
       },
       {
         parent: this.namespace,
-        dependsOn: [this.namespace, this.istioBase, this.istiod],
+        dependsOn: [
+          this.namespace,
+          this.istioBase,
+          this.istiod,
+          istiodDeployment,
+        ],
         transformations: [
+          /**
+           * Don't wait for the deployment to be ready because the first
+           * time it is spun-up, it will
+           */
           ({
             props,
             opts,
