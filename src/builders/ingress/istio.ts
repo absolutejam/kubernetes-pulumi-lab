@@ -1,87 +1,79 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as kubernetes from "@pulumi/kubernetes";
 
-import { Gateway } from "../../crds/istio/networking/v1beta1";
-import { IstioConfig } from "../../types";
 import { Namespace } from "@pulumi/kubernetes/core/v1";
+import { Deployment } from "@pulumi/kubernetes/apps/v1";
+import { NetworkPolicy } from "@pulumi/kubernetes/networking/v1";
 
-export type IstioResources = {
+import { Gateway } from "../../crds/istio/networking/v1beta1";
+import { Certificate } from "../../crds/cert-manager/certmanager/v1";
+import { IstioGatewayConfig } from "../../types";
+
+import { networking } from "../../crds/istio/types/input";
+type GatewaySpecServersArgs = networking.v1beta1.GatewaySpecServersArgs;
+
+export type IstioGatewayResources = {
   type: "istio";
-  namespace: Namespace;
+  /**
+   * The namespace that was used, either created or using an existing namespace
+   */
+  namespace:
+    | { kind: "name"; name: string }
+    | { kind: "resource"; namespace: Namespace };
   gateway: Gateway;
-  istioBase: kubernetes.helm.v3.Chart;
-  istiod: kubernetes.helm.v3.Chart;
   istioGateway: kubernetes.helm.v3.Chart;
+  labels: Record<string, string>;
+  tlsCert: Certificate | undefined;
 };
 
-export class Istio extends pulumi.ComponentResource implements IstioResources {
+export class IstioGateway
+  extends pulumi.ComponentResource
+  implements IstioGatewayResources
+{
   public type = "istio" as const;
-
-  public namespace: Namespace;
+  public namespace:
+    | { kind: "name"; name: string }
+    | { kind: "resource"; namespace: Namespace };
   public gateway: Gateway;
-  public istioBase: kubernetes.helm.v3.Chart;
-  public istiod: kubernetes.helm.v3.Chart;
   public istioGateway: kubernetes.helm.v3.Chart;
+  public labels: Record<string, string>;
+  public tlsCert: Certificate | undefined;
 
-  constructor({ namespace, version, labels }: IstioConfig) {
-    super("k8slab:infra:Istio", "istio", {}, {});
+  constructor(
+    { tls, namespace, createNamespace, version, labels }: IstioGatewayConfig,
+    opts?: pulumi.ComponentResourceOptions
+  ) {
+    super("k8slab:infra:IstioGateway", "istio-gateway", {}, opts);
 
-    this.namespace = new kubernetes.core.v1.Namespace(
-      "istio-namespace",
-      {
-        metadata: { name: namespace },
-      },
-      { parent: this }
-    );
+    this.labels = labels;
 
-    this.istioBase = new kubernetes.helm.v3.Chart(
-      "istio-base",
-      {
-        chart: "base",
-        namespace: this.namespace.metadata.name,
-        version,
-        repo: "istio",
-        fetchOpts: {
-          repo: "https://istio-release.storage.googleapis.com/charts",
-        },
-        values: {
-          meshConfig: {
-            enablePrometheusMerge: true,
+    // Frustratingly, Pulumi's resource getters (eg. `Namespace.get`) don't
+    // seem to respect dependency ordering, so if you try to call it and the
+    // resource exists, the entire thing blows up.
+    if (createNamespace) {
+      const namespaceResource = new kubernetes.core.v1.Namespace(
+        "istio-gateway-namespace",
+        {
+          metadata: {
+            name: namespace,
+            labels,
           },
         },
-      },
-      { parent: this.namespace, dependsOn: [this.namespace] }
-    );
+        { parent: this }
+      );
 
-    this.istiod = new kubernetes.helm.v3.Chart(
-      "istiod",
-      {
-        chart: "istiod",
-        namespace: this.namespace.metadata.name,
-        version,
-        repo: "istio",
-        fetchOpts: {
-          repo: "https://istio-release.storage.googleapis.com/charts",
-        },
-        values: {
-          meshConfig: {
-            enablePrometheusMerge: true,
-          },
-        },
-      },
-      { parent: this.namespace, dependsOn: [this.namespace, this.istioBase] }
-    );
-
-    const istiodDeployment = this.namespace.metadata.name.apply((namespace) =>
-      this.istiod.getResource("apps/v1/Deployment", `${namespace}/istiod`)
-    );
+      this.namespace = { kind: "resource", namespace: namespaceResource };
+    } else {
+      this.namespace = { kind: "name", name: namespace };
+    }
 
     this.istioGateway = new kubernetes.helm.v3.Chart(
       "istio-gateway",
       {
         chart: "gateway",
+
         // TODO: Should this be a separate namespace, eg. `istio-ingress`?
-        namespace: this.namespace.metadata.name,
+        namespace,
         version,
         repo: "istio",
         fetchOpts: {
@@ -90,13 +82,10 @@ export class Istio extends pulumi.ComponentResource implements IstioResources {
         values: {},
       },
       {
-        parent: this.namespace,
-        dependsOn: [
-          this.namespace,
-          this.istioBase,
-          this.istiod,
-          istiodDeployment,
-        ],
+        parent:
+          this.namespace.kind === "resource" ? this.namespace.namespace : this,
+        dependsOn:
+          this.namespace.kind === "resource" ? [this.namespace.namespace] : [],
         transformations: [
           /**
            * Don't wait for the deployment to be ready because the first
@@ -125,12 +114,50 @@ export class Istio extends pulumi.ComponentResource implements IstioResources {
       }
     );
 
+    var tlsServer: GatewaySpecServersArgs | undefined = undefined;
+
+    if (tls && tls.enabled) {
+      this.tlsCert = new Certificate(
+        "istio-ingress-tls-cert",
+        {
+          metadata: {
+            name: "istio-ingress-tls-cert",
+            namespace,
+          },
+          spec: {
+            secretName: tls.certSecretName,
+            commonName: tls.commonName,
+            dnsNames: tls.hostnames,
+            issuerRef: {
+              kind: tls.issuerKind,
+              name: tls.issuerName,
+              group: "cert-manager.io",
+            },
+          },
+        },
+        { parent: this }
+      );
+
+      tlsServer = {
+        port: {
+          number: 443,
+          name: "https",
+          protocol: "HTTPS",
+        },
+        tls: {
+          mode: "SIMPLE",
+          credentialName: tls.certSecretName,
+        },
+        hosts: tls.hostnames,
+      };
+    }
+
     this.gateway = new Gateway(
       "istio-ingress-gateway",
       {
         metadata: {
           name: "istio-ingress-gateway",
-          namespace: this.namespace.metadata.name,
+          namespace,
         },
         spec: {
           selector: labels,
@@ -143,21 +170,77 @@ export class Istio extends pulumi.ComponentResource implements IstioResources {
                 protocol: "HTTP",
               },
             },
-            // {
-            //     port: {
-            //         number: 443,
-            //         name: "https",
-            //         protocol: "HTTPS",
-            //     },
-            //     hosts: ["*"],
-            // },
+
+            ...(tlsServer ? [tlsServer] : []),
           ],
         },
       },
       {
-        parent: this.namespace,
-        dependsOn: [this.istioBase, this.istiod, this.istioGateway],
+        parent:
+          this.namespace.kind === "resource" ? this.namespace.namespace : this,
+        dependsOn:
+          this.namespace.kind === "resource" ? [this.namespace.namespace] : [],
       }
     );
   }
+}
+
+export type IstioIngressNetworkPolicyOpts = {
+  name: string;
+  istio: IstioGatewayResources;
+  targetDeployment: Deployment;
+};
+
+export function istioIngressNetworkPolicy({
+  name,
+  istio,
+  targetDeployment,
+}: IstioIngressNetworkPolicyOpts): NetworkPolicy {
+  const namespace: pulumi.Output<string> = (() => {
+    switch (istio.namespace.kind) {
+      case "name":
+        return pulumi.Output.create(istio.namespace.name);
+
+      case "resource":
+        return istio.namespace.namespace.metadata.name;
+    }
+  })();
+
+  return new kubernetes.networking.v1.NetworkPolicy(
+    `${name}-istio-ingress-only`,
+    {
+      metadata: {
+        name,
+        namespace: targetDeployment.metadata.namespace,
+        labels: targetDeployment.metadata.labels,
+      },
+      spec: {
+        policyTypes: ["Ingress"],
+        podSelector: {
+          matchLabels: targetDeployment.spec.selector.matchLabels,
+        },
+        ingress: [
+          {
+            from: [
+              {
+                namespaceSelector: {
+                  matchLabels: namespace.apply((namespace) => {
+                    return {
+                      "kubernetes.io/metadata.name": namespace,
+                    };
+                  }),
+                },
+              },
+              {
+                podSelector: {
+                  matchLabels: istio.labels,
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
+    { parent: targetDeployment }
+  );
 }

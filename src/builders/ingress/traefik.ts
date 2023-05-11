@@ -6,8 +6,14 @@ import { NetworkPolicy } from "@pulumi/kubernetes/networking/v1";
 
 import { TraefikConfig } from "../../types";
 
+export type TraefikOpts = {
+  // TODO:
+} & Pick<TraefikConfig, "labels" | "namespace">;
+
 export type TraefikResources = {
   type: "traefik";
+  labels: Record<string, string>;
+  namespace: string;
 };
 
 export class Traefik
@@ -18,8 +24,11 @@ export class Traefik
   public labels: Record<string, string>;
   public namespace: string;
 
-  constructor({ labels, namespace }: TraefikConfig) {
-    super("k8slab:infra:Traefik", "traefik", {}, {});
+  constructor(
+    { labels, namespace }: TraefikOpts,
+    opts?: pulumi.ComponentResourceOptions
+  ) {
+    super("k8slab:infra:Traefik", "traefik", {}, opts);
 
     this.labels = labels;
     this.namespace = namespace;
@@ -28,7 +37,7 @@ export class Traefik
 
 export type TraefikIngressNetworkPolicyOpts = {
   name: string;
-  traefik: Traefik;
+  traefik: TraefikResources;
   targetDeployment: Deployment;
 };
 
@@ -70,6 +79,6 @@ export function traefikIngressNetworkPolicy({
         ],
       },
     },
-    { parent: targetDeployment, dependsOn: [traefik] }
+    { parent: targetDeployment }
   );
 }

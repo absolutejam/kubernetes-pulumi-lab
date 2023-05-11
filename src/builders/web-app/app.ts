@@ -331,10 +331,14 @@ export class WebApp
 
     this.networkResources = withIngress(ingress, {
       traefik: (traefik) =>
-        new WebAppTraefik(name, { traefik, ...this }, { parent: this }),
+        new WebAppTraefik(
+          name,
+          { traefik, ...this },
+          { parent: this.namespace }
+        ),
 
       istio: (istio) =>
-        new WebAppIstio(name, { istio, ...this }, { parent: this }),
+        new WebAppIstio(name, { istio, ...this }, { parent: this.namespace }),
     });
   }
 }

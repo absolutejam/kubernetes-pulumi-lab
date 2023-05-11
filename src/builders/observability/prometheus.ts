@@ -1,13 +1,10 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as kubernetes from "@pulumi/kubernetes";
 
-import { Namespace, Service } from "@pulumi/kubernetes/core/v1";
 import { Chart } from "@pulumi/kubernetes/helm/v3";
-import { withIngress, Ingress, Istio } from "../ingress";
-import {
-  VirtualService,
-  VirtualServiceArgs,
-} from "../../crds/istio/networking/v1beta1";
+import { Namespace, Service } from "@pulumi/kubernetes/core/v1";
+import { VirtualService } from "../../crds/istio/networking/v1beta1";
+import { withIngress, Ingress, IstioGatewayResources } from "../ingress";
 
 import { PrometheusStackConfig } from "../../types";
 import { ObjectMeta } from "../../crds/istio/meta/v1";
@@ -326,13 +323,16 @@ export class PrometheusStack
       //   { parent: this }
       // ),
       istio: (istio) =>
-        new PrometheusStackIstio({ istio, ...this }, { parent: this }),
+        new PrometheusStackIstio(
+          { istio, ...this },
+          { parent: this.namespace }
+        ),
     });
   }
 }
 
 export type PrometheusStackIstioOpts = {
-  istio: Istio;
+  istio: IstioGatewayResources;
 } & Pick<PrometheusStackResources, "namespace" | "service">;
 
 export type PrometheusStackIstioResources = {

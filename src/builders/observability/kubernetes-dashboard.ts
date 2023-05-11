@@ -9,9 +9,20 @@ export type KubernetesDashboardOpts = {
   version?: string;
 };
 
-export class KubernetesDashboard extends pulumi.ComponentResource {
+export type KubernetesDashboardResources = {
+  namespace: Namespace;
+  chart: Chart;
+  serviceAccount: ServiceAccount;
+  clusterRoleBinding: ClusterRoleBinding;
+  tokenSecret: Secret;
+};
+
+export class KubernetesDashboard
+  extends pulumi.ComponentResource
+  implements KubernetesDashboardResources
+{
   public namespace: Namespace;
-  public release: Chart;
+  public chart: Chart;
   public serviceAccount: ServiceAccount;
   public clusterRoleBinding: ClusterRoleBinding;
   public tokenSecret: Secret;
@@ -41,12 +52,13 @@ export class KubernetesDashboard extends pulumi.ComponentResource {
       { parent: this }
     );
 
-    this.release = new kubernetes.helm.v3.Chart(
+    this.chart = new kubernetes.helm.v3.Chart(
       "dashboard",
       {
         chart: "kubernetes-dashboard",
         namespace: this.namespace.metadata.name,
         repo: "kubernetes-dashboard",
+        version,
         fetchOpts: {
           repo: "https://kubernetes.github.io/dashboard",
         },
@@ -86,7 +98,7 @@ export class KubernetesDashboard extends pulumi.ComponentResource {
           },
         ],
       },
-      { parent: this.namespace }
+      { parent: this }
     );
 
     this.tokenSecret = new kubernetes.core.v1.Secret(

@@ -81,6 +81,7 @@ on your system.
 
   ```bash
   crd2pulumi \
+      --force \
       --nodejs \
       --nodejsName crds \
       --nodejsPath src/crds/traefik \
@@ -116,10 +117,78 @@ on your system.
 
   ```bash
   crd2pulumi \
+      --force \
       --nodejs \
       --nodejsName crds \
       --nodejsPath src/crds/istio \
       ${OUT}/Base/Base.yaml
+  ```
+
+## Cert Manager 
+
+### (Re)Generating Cert Manager CRDs
+
+To generate the CRD definitions for use with Pulumi, you will need `pulumi2crd`
+on your system.
+
+- Export the CRD definitions from the cluster:
+
+  ```bash
+  OUT=./src/crds/source/cert-manager
+  mkdir -p ${OUT}
+  kubectl --context=${K8S_CLUSTER} get crd certificaterequests.cert-manager.io -o yaml > ${OUT}/certificaterequests.yaml
+  kubectl --context=${K8S_CLUSTER} get crd certificates.cert-manager.io -o yaml        > ${OUT}/certificates.yaml
+  kubectl --context=${K8S_CLUSTER} get crd issuers.cert-manager.io -o yaml             > ${OUT}/issuers.yaml
+  kubectl --context=${K8S_CLUSTER} get crd clusterissuers.cert-manager.io -o yaml      > ${OUT}/clusterissuers.yaml
+  kubectl --context=${K8S_CLUSTER} get crd challenges.acme.cert-manager.io -o yaml     > ${OUT}/challenges.yaml
+  kubectl --context=${K8S_CLUSTER} get crd orders.acme.cert-manager.io -o yaml         > ${OUT}/orders.yaml
+  ```
+
+- Generate the Pulumi CRD definitions:
+
+  ```bash
+  crd2pulumi \
+      --force \
+      --nodejs \
+      --nodejsName crds \
+      --nodejsPath src/crds/cert-manager \
+      ${OUT}/challenges.yaml ${OUT}/certificaterequests.yaml ${OUT}/certificates.yaml ${OUT}/challenges.yaml ${OUT}/clusterissuers.yaml ${OUT}/issuers.yaml
+  ```
+
+## Prometheus
+
+### (Re)Generating Prometheus CRDs
+
+Most of this can be done via. the Helm chart, but it's nice to have access
+to the actual CRDs (eg. `PrometheusRule`)
+
+To generate the CRD definitions for use with Pulumi, you will need `pulumi2crd`
+on your system.
+
+- Export the CRD definitions from the cluster:
+
+  ```bash
+  OUT=./src/crds/source/prometheus
+  mkdir -p ${OUT}
+  kubectl --context=${K8S_CLUSTER} get crd alertmanagerconfigs.monitoring.coreos.com -o yaml > ${OUT}/alertmanagerconfigs.yaml
+  kubectl --context=${K8S_CLUSTER} get crd alertmanagers.monitoring.coreos.com -o yaml       > ${OUT}/alertmanagers.yaml
+  kubectl --context=${K8S_CLUSTER} get crd podmonitors.monitoring.coreos.com -o yaml         > ${OUT}/podmonitors.yaml
+  kubectl --context=${K8S_CLUSTER} get crd probes.monitoring.coreos.com -o yaml              > ${OUT}/probes.yaml
+  kubectl --context=${K8S_CLUSTER} get crd prometheuses.monitoring.coreos.com -o yaml        > ${OUT}/prometheuses.yaml
+  kubectl --context=${K8S_CLUSTER} get crd prometheusrules.monitoring.coreos.com -o yaml     > ${OUT}/prometheusrules.yaml
+  kubectl --context=${K8S_CLUSTER} get crd servicemonitors.monitoring.coreos.com -o yaml     > ${OUT}/servicemonitors.yaml
+  kubectl --context=${K8S_CLUSTER} get crd thanosrulers.monitoring.coreos.com -o yaml        > ${OUT}/thanosrulers.yaml
+  ```
+
+- Generate the Pulumi CRD definitions:
+
+  ```bash
+  crd2pulumi \
+      --force \
+      --nodejs \
+      --nodejsName crds \
+      --nodejsPath src/crds/prometheus \
+      ${OUT}/alertmanagerconfigs.yaml ${OUT}/alertmanagers.yaml ${OUT}/podmonitors.yaml ${OUT}/probes.yaml ${OUT}/prometheuses.yaml ${OUT}/prometheusrules.yaml ${OUT}/servicemonitors.yaml ${OUT}/thanosrulers.yaml
   ```
 
 ## Stack config
@@ -134,12 +203,40 @@ pulumi config set-all --path \
   --plaintext "environments[1]"="production"
 ```
 
+### Istio mesh config
+
+  ```bash
+  pulumi config set-all --path \
+    --plaintext "istio.install"="true" \
+    --plaintext "istio.namespace"="istio-system" \
+    --plaintext "istio.labels"='{
+        "istio": "gateway"
+      }'
+  ```
+
+### Cert Manager config
+
+  ```bash
+  pulumi config set-all --path \
+    --plaintext "cert-manager.namespace"="cert-manager" \
+    --plaintext "cert-manager.labels"='{
+        "istio": "gateway"
+      }'
+  ```
+
 ### Web-app config
 
 ```bash
 pulumi config set-all --path \
   --plaintext "web-app.image"="nginx" \
   --plaintext "web-app.replicas"="2"
+```
+
+### Prometheus config
+
+```bash
+pulumi config set-all --path \
+  --plaintext "prometheus-stack.version"="45.27.1"
 ```
 
 ### Kubernetes dashboard config
@@ -164,7 +261,7 @@ pulumi config set-all --path \
       }'
   ```
 
-- If using Istio...
+- If using Istio ingress gateway...
 
   ```bash
   pulumi config set-all --path \
@@ -174,6 +271,18 @@ pulumi config set-all --path \
     --plaintext "ingress.labels"='{
         "istio": "gateway"
       }'
+  ```
+
+  And if using TLS...
+
+  ```bash
+  pulumi config set-all --path \
+    --plaintext "ingress.tls.enabled"="true" \
+    --plaintext "ingress.tls.commonName"="localhost" \
+    --plaintext "ingress.tls.issuerKind"="ClusterIssuer" \
+    --plaintext "ingress.tls.issuerName"="self-signed-issuer" \
+    --plaintext "ingress.tls.certSecretName"="ingress-cert" \
+    --plaintext "ingress.tls.hostnames[0]"="localhost.local"
   ```
 
 ## Layout

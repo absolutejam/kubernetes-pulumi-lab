@@ -4,7 +4,7 @@ import {
   DestinationRule,
 } from "../../crds/istio/networking/v1beta1";
 import { WebAppResources } from "./app";
-import { IstioResources } from "../ingress/istio";
+import { IstioGatewayResources } from "../ingress/istio";
 import { ObjectMeta } from "../../crds/istio/meta/v1";
 
 export type WebAppIstioResources = {
@@ -14,7 +14,7 @@ export type WebAppIstioResources = {
 
 export type WebAppIstioOpts = {
   environment: string;
-  istio: IstioResources;
+  istio: IstioGatewayResources;
 } & Pick<WebAppResources, "namespace" | "deployment" | "service">;
 
 export class WebAppIstio
