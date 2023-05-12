@@ -223,89 +223,26 @@ on your system.
 
 ## Stack config
 
-### Base config
+**Required config**
 
 ```bash
 pulumi config set-all --path \
   --plaintext "kubernetes:renderYamlToDirectory"="dist"
 ```
 
-### Environments
+Optional config:
 
 ```bash
 pulumi config set-all --path \
-  --plaintext "environments[0]"="staging" \
-  --plaintext "environments[1]"="production"
-```
-
-### Istio mesh config
-
-  ```bash
-  pulumi config set-all --path \
-    --plaintext "istio.install"="true" \
-    --plaintext "istio.namespace"="istio-system" \
-    --plaintext "istio.labels"='{
-        "istio": "gateway"
-      }'
-  ```
-
-### Cert Manager config
-
-  ```bash
-  pulumi config set-all --path \
-    --plaintext "cert-manager.namespace"="cert-manager" \
-    --plaintext "cert-manager.labels"='{
-        "istio": "gateway"
-      }'
-  ```
-
-### Web-app config
-
-```bash
-pulumi config set-all --path \
-  --plaintext "web-app.image"="nginx" \
-  --plaintext "web-app.replicas"="2"
-```
-
-### Prometheus config
-
-```bash
-pulumi config set-all --path \
-  --plaintext "prometheus-stack.version"="45.27.1"
-```
-
-### Kubernetes dashboard config
-
-```bash
-pulumi config set-all --path \
-  --plaintext "kubernetes-dashboard.enabled"="true"
-```
-
-### Ingress config
-
-- If using traefik...
-
-  ```bash
-  pulumi config set-all --path \
-    --plaintext "ingress.type"="traefik" \
-    --plaintext "ingress.install"="false" \
-    --plaintext "ingress.namespace"="kube-system" \
-    --plaintext "ingress.labels"='{
-        "app.kubernetes.io/name": "traefik",
-        "app.kubernetes.io/instance": "traefik"
-      }'
-  ```
-
-- If using Istio ingress gateway...
-
-  ```bash
-  pulumi config set-all --path \
-    --plaintext "ingress.type"="istio" \
-    --plaintext "ingress.install"="true" \
-    --plaintext "ingress.namespace"="istio-system" \
-    --plaintext "ingress.labels"='{
-        "istio": "gateway"
-      }'
+  \
+  --plaintext "istio.namespace"="istio-system" \
+  --plaintext "istio.selector"='{
+      "istio": "gateway"
+    }' \
+  \
+  --plaintext "ingress.namespace"="istio-system" \
+  \
+  --plaintext "cert-manager.namespace"="cert-manager" \
   ```
 
   And if using TLS...

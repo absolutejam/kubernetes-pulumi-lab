@@ -1,0 +1,52 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: "2023-05-11T15:55:53Z"
+  generation: 1
+  labels:
+    app.kubernetes.io/managed-by: pulumi
+  name: kialis.kiali.io
+  resourceVersion: "148008"
+  uid: 94de90c8-b369-49d2-95fc-815e94708a51
+spec:
+  conversion:
+    strategy: None
+  group: kiali.io
+  names:
+    kind: Kiali
+    listKind: KialiList
+    plural: kialis
+    singular: kiali
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec: 
+            type: object
+            description: Kiali CRD fields
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: Kiali
+    listKind: KialiList
+    plural: kialis
+    singular: kiali
+  conditions:
+  - lastTransitionTime: "2023-05-11T15:55:53Z"
+    message: no conflicts found
+    reason: NoConflicts
+    status: "True"
+    type: NamesAccepted
+  - lastTransitionTime: "2023-05-11T15:55:53Z"
+    message: the initial names have been accepted
+    reason: InitialNamesAccepted
+    status: "True"
+    type: Established
+  storedVersions:
+  - v1alpha1

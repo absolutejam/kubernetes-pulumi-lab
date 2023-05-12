@@ -1,0 +1,33 @@
+encryptionsalt: v1:iXyKYoivYr0=:v1:+0DRbNQlnc01U6It:9Vvv4SzNPKLsZdxXat1CH0xCoP8h6Q==
+config:
+  kubernetes-lab:cert-manager:
+    labels: |-
+      {
+      "istio": "gateway"
+      }
+    namespace: cert-manager
+  kubernetes-lab:environments:
+    - staging
+    - production
+  kubernetes-lab:ingress:
+    install: true
+    labels: |-
+      {
+      "istio": "gateway"
+      }
+    namespace: istio-ingress
+    tls:
+      certSecretName: ingress-cert
+      commonName: localhost
+      enabled: true
+      hostnames:
+        - localhost.local
+      issuerKind: ClusterIssuer
+      issuerName: self-signed-issuer
+    type: istio
+  kubernetes-lab:prometheus-stack:
+    version: 45.27.1
+  kubernetes-lab:web-app:
+    image: nginx
+    replicas: 2
+  kubernetes:cluster: k3d-local-lab
