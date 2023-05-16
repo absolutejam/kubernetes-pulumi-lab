@@ -1,0 +1,29 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"networking.istio.io/v1beta1","kind":"Gateway","metadata":{"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"istio-gateway","namespace":"istio-gateway"},"spec":{"selector":{"istio":"gateway"},"servers":[{"hosts":["*"],"port":{"name":"http","number":80,"protocol":"HTTP"}},{"hosts":["k8s-lab.local"],"port":{"name":"https","number":443,"protocol":"HTTPS"},"tls":{"credentialName":"ingress-cert","mode":"SIMPLE"}}]}}
+  labels:
+    app.kubernetes.io/managed-by: pulumi
+  name: istio-gateway
+  namespace: istio-gateway
+spec:
+  selector:
+    istio: gateway
+  servers:
+  - hosts:
+    - '*'
+    port:
+      name: http
+      number: 80
+      protocol: HTTP
+  - hosts:
+    - k8s-lab.local
+    port:
+      name: https
+      number: 443
+      protocol: HTTPS
+    tls:
+      credentialName: ingress-cert
+      mode: SIMPLE

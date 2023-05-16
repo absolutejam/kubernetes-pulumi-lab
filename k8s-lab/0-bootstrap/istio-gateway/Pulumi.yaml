@@ -1,0 +1,3 @@
+name: istio-gateway
+runtime: nodejs
+description: Deploys Istio Gateway

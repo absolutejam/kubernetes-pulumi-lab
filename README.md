@@ -1,36 +1,44 @@
-# Core
+# k8s-lab
 
-Resources to spin up test applications into a Kubernetes cluster.
+This is a mono-repo, containing all of the resources required to set up a
+fully-featured Kubernetes cluster, complete with GitOps deployment workflows,
+Istio service mesh and other goodies.
 
-```bash
-export K3D_CLUSTER=local-lab
-export K8S_CLUSTER=k3d-${K3D_CLUSTER}
-```
 
-## Cluster spinup
+## Cluster setup
 
-```bash
-export VOLUME=/tmp/${K8S_CLUSTER}
+Spin up the cluster with `k3d`
 
-mkdir -p ${VOLUME} || true
+  - Export some reusable variables
 
-k3d cluster create ${K3D_CLUSTER} \
-  --volume ${VOLUME}:${VOLUME} \
-  --servers 3 \
-  -p "8090:80@loadbalancer" \
-  -p "8043:443@loadbalancer" \
-  --k3s-arg 'disable=traefik@server:*'
-```
+    ```bash
+    export K3D_CLUSTER=local-lab
+    export K8S_CLUSTER=k3d-${K3D_CLUSTER}
+    ```
 
-## Setup
 
-- Pull dependencies
+  - Spin up the cluster
 
-  ```bash
-  npm install
-  ```
+    **NOTE:** Traefik is not deployed
 
-- Set up Pulumi state
+    ```bash
+    export VOLUME=/tmp/${K8S_CLUSTER}
+
+    mkdir -p ${VOLUME} || true
+
+    k3d cluster create ${K3D_CLUSTER} \
+      --volume ${VOLUME}:${VOLUME} \
+      --servers 3 \
+      -p "8090:80@loadbalancer" \
+      -p "8043:443@loadbalancer" \
+      --k3s-arg 'disable=traefik@server:*'
+    ```
+
+
+## Pulumi setup
+
+- Set up the Pulumi state store which is used by all of the individual Pulumi 
+  projects
 
   NOTE: State is stored locally since this is just for a lab
 
@@ -39,50 +47,12 @@ k3d cluster create ${K3D_CLUSTER} \
   export PULUMI_CONFIG_PASSPHRASE='waffle123!'
   ```
 
-- Initialise the `dev` stack (Because the state is not tracked)
 
-  ```bash
-  rm -rf .state/.pulumi || true
-  pulumi stack init dev
-  ```
+## Utilities
 
-- Select the `dev` stack
+Some CLI utilities that are handy to have installed.
 
-  ```bash
-  pulumi stack select dev
-  ```
-
-## Traefik
-
-### (Re)Generating Traefik CRDs
-By default, `k3d` ships with Traefik installed in the cluster.
-
-To generate the CRD definitions for use with Pulumi, you will need `pulumi2crd`
-on your system.
-
-- Export the CRD definitions from the cluster:
-
-  ```bash
-  OUT=./src/crds/source/traefik
-  mkdir -p ${OUT}
-  kubectl --context=${K8S_CLUSTER} get crd ingressroutes.traefik.containo.us -o yaml > ${OUT}/ingressroutes.yaml
-  kubectl --context=${K8S_CLUSTER} get crd middlewares.traefik.containo.us -o yaml   > ${OUT}/middlewares.yaml
-  ```
-
-- Generate the Pulumi CRD definitions:
-
-  ```bash
-  crd2pulumi \
-      --force \
-      --nodejs \
-      --nodejsName crds \
-      --nodejsPath src/crds/traefik \
-      ${OUT}/ingressroutes.yaml ${OUT}/middlewares.yaml
-  ```
-
-## Istio
-
-### Installing `istioctl` locally
+### `istioctl`
 
 ```bash
 export ISTIO_VERSION=1.17.2
@@ -92,15 +62,18 @@ chmod +x ~/bin/istioctl
 rm -rf ./istio-${ISTIO_VERSION}
 ```
 
-### (Re)Generating Istio CRDs
+
+## CRDs
 
 To generate the CRD definitions for use with Pulumi, you will need `pulumi2crd`
 on your system.
 
+### Istio
+
 - Export the CRD from `istioctl`:
 
   ```bash
-  OUT=./src/crds/source/istio
+  OUT=./k8s-lab/crds/__source/istio
   mkdir -p ${OUT}
   istioctl manifest generate -o ${OUT}
   ```
@@ -112,31 +85,28 @@ on your system.
       --force \
       --nodejs \
       --nodejsName crds \
-      --nodejsPath src/crds/istio \
+      --nodejsPath k8s-lab/crds/istio \
       ${OUT}/Base/Base.yaml
   ```
 
-### (Re)Generating Kiali Operator CRDs
+### Kiali
 
-To generate the CRD definitions for use with Pulumi, you will need `pulumi2crd`
-on your system.
-
-- Export the CRD from the cluster:
+- Export the CRDs from the cluster:
 
   ```bash
-  OUT=./src/crds/source/kiali
+  OUT=./k8s-lab/crds/__source/kiali
   mkdir -p ${OUT}
   kubectl --context=${K8S_CLUSTER} get crd kialis.kiali.io -o yaml > ${OUT}/kialis.yaml
   ```
 
-- Generate the Pulumi CRD definitions:
+- Generate the Pulumi CRD types:
 
   ```bash
   crd2pulumi \
       --force \
       --nodejs \
       --nodejsName crds \
-      --nodejsPath src/crds/kiali \
+      --nodejsPath k8s-lab/crds/kiali \
       ${OUT}/kialis.yaml
   ```
 
@@ -154,17 +124,12 @@ on your system.
             description: Kiali CRD fields
   ```
 
-## Cert Manager 
+### Cert Manager 
 
-### (Re)Generating Cert Manager CRDs
-
-To generate the CRD definitions for use with Pulumi, you will need `pulumi2crd`
-on your system.
-
-- Export the CRD definitions from the cluster:
+- Export the CRDs from the cluster:
 
   ```bash
-  OUT=./src/crds/source/cert-manager
+  OUT=./k8s-lab/crds/__source/cert-manager
   mkdir -p ${OUT}
   kubectl --context=${K8S_CLUSTER} get crd certificaterequests.cert-manager.io -o yaml > ${OUT}/certificaterequests.yaml
   kubectl --context=${K8S_CLUSTER} get crd certificates.cert-manager.io -o yaml        > ${OUT}/certificates.yaml
@@ -174,31 +139,67 @@ on your system.
   kubectl --context=${K8S_CLUSTER} get crd orders.acme.cert-manager.io -o yaml         > ${OUT}/orders.yaml
   ```
 
-- Generate the Pulumi CRD definitions:
+- Generate the Pulumi CRD types:
 
   ```bash
   crd2pulumi \
       --force \
       --nodejs \
       --nodejsName crds \
-      --nodejsPath src/crds/cert-manager \
+      --nodejsPath k8s-lab/crds/cert-manager-crds \
       ${OUT}/challenges.yaml ${OUT}/certificaterequests.yaml ${OUT}/certificates.yaml ${OUT}/challenges.yaml ${OUT}/clusterissuers.yaml ${OUT}/issuers.yaml
   ```
 
-## Prometheus
+### Sealed Secrets
 
-### (Re)Generating Prometheus CRDs
-
-Most of this can be done via. the Helm chart, but it's nice to have access
-to the actual CRDs (eg. `PrometheusRule`)
-
-To generate the CRD definitions for use with Pulumi, you will need `pulumi2crd`
-on your system.
-
-- Export the CRD definitions from the cluster:
+- Export the CRDs from the cluster:
 
   ```bash
-  OUT=./src/crds/source/prometheus
+  OUT=./k8s-lab/crds/__source/sealed-secrets
+  mkdir -p ${OUT}
+  kubectl --context=${K8S_CLUSTER} get crd sealedsecrets.bitnami.com -o yaml > ${OUT}/sealed-secrets.yaml
+  ```
+
+- Generate the Pulumi CRD types:
+
+  ```bash
+  crd2pulumi \
+      --force \
+      --nodejs \
+      --nodejsName crds \
+      --nodejsPath k8s-lab/crds/sealed-secrets-crds \
+      ${OUT}/sealed-secrets.yaml
+  ```
+
+### ArgoCD
+
+- Export the CRDs from the cluster:
+
+  ```bash
+  OUT=./k8s-lab/crds/__source/argocd
+  mkdir -p ${OUT}
+  kubectl --context=${K8S_CLUSTER} get crd applications.argoproj.io -o yaml    > ${OUT}/applications.yaml
+  kubectl --context=${K8S_CLUSTER} get crd applicationsets.argoproj.io -o yaml > ${OUT}/applicationsets.yaml
+  kubectl --context=${K8S_CLUSTER} get crd appprojects.argoproj.io -o yaml     > ${OUT}/appprojects.yaml
+  ```
+
+- Generate the Pulumi CRD types:
+
+  ```bash
+  crd2pulumi \
+      --force \
+      --nodejs \
+      --nodejsName crds \
+      --nodejsPath k8s-lab/crds/argocd-crds \
+      ${OUT}/applications.yaml ${OUT}/applicationsets.yaml ${OUT}/appprojects.yaml
+  ```
+
+### Prometheus
+
+- Export the CRDs from the cluster:
+
+  ```bash
+  OUT=./k8s-lab/crds/__source/prometheus
   mkdir -p ${OUT}
   kubectl --context=${K8S_CLUSTER} get crd alertmanagerconfigs.monitoring.coreos.com -o yaml > ${OUT}/alertmanagerconfigs.yaml
   kubectl --context=${K8S_CLUSTER} get crd alertmanagers.monitoring.coreos.com -o yaml       > ${OUT}/alertmanagers.yaml
@@ -210,138 +211,59 @@ on your system.
   kubectl --context=${K8S_CLUSTER} get crd thanosrulers.monitoring.coreos.com -o yaml        > ${OUT}/thanosrulers.yaml
   ```
 
-- Generate the Pulumi CRD definitions:
+- Generate the Pulumi CRD types:
 
   ```bash
   crd2pulumi \
       --force \
       --nodejs \
       --nodejsName crds \
-      --nodejsPath src/crds/prometheus \
+      --nodejsPath k8s-lab/crds/prometheus-crds \
       ${OUT}/alertmanagerconfigs.yaml ${OUT}/alertmanagers.yaml ${OUT}/podmonitors.yaml ${OUT}/probes.yaml ${OUT}/prometheuses.yaml ${OUT}/prometheusrules.yaml ${OUT}/servicemonitors.yaml ${OUT}/thanosrulers.yaml
   ```
 
-## Stack config
 
-### Base config
+## Setup
 
-```bash
-pulumi config set-all --path \
-  --plaintext "kubernetes:renderYamlToDirectory"="dist"
-```
+  - First, we need to bootstrap the core resources:
+  
+    - `istio`
+    - `istio-ingress`
+    - `sealed-secrets`
+    - `argocd`
+    - `gitea`
 
-### Environments
+  - Set up repos
+  
+    ``bash
+    tea repo create --name 'gitea'
+    tea repo create --name 'istio'
+    tea repo create --name 'argocd'
+    ```
 
-```bash
-pulumi config set-all --path \
-  --plaintext "environments[0]"="staging" \
-  --plaintext "environments[1]"="production"
-```
+  - Now push resources to each repo
 
-### Istio mesh config
-
-  ```bash
-  pulumi config set-all --path \
-    --plaintext "istio.install"="true" \
-    --plaintext "istio.namespace"="istio-system" \
-    --plaintext "istio.labels"='{
-        "istio": "gateway"
-      }'
-  ```
-
-### Cert Manager config
-
-  ```bash
-  pulumi config set-all --path \
-    --plaintext "cert-manager.namespace"="cert-manager" \
-    --plaintext "cert-manager.labels"='{
-        "istio": "gateway"
-      }'
-  ```
-
-### Web-app config
-
-```bash
-pulumi config set-all --path \
-  --plaintext "web-app.image"="nginx" \
-  --plaintext "web-app.replicas"="2"
-```
-
-### Prometheus config
-
-```bash
-pulumi config set-all --path \
-  --plaintext "prometheus-stack.version"="45.27.1"
-```
-
-### Kubernetes dashboard config
-
-```bash
-pulumi config set-all --path \
-  --plaintext "kubernetes-dashboard.enabled"="true"
-```
-
-### Ingress config
-
-- If using traefik...
-
-  ```bash
-  pulumi config set-all --path \
-    --plaintext "ingress.type"="traefik" \
-    --plaintext "ingress.install"="false" \
-    --plaintext "ingress.namespace"="kube-system" \
-    --plaintext "ingress.labels"='{
-        "app.kubernetes.io/name": "traefik",
-        "app.kubernetes.io/instance": "traefik"
-      }'
-  ```
-
-- If using Istio ingress gateway...
-
-  ```bash
-  pulumi config set-all --path \
-    --plaintext "ingress.type"="istio" \
-    --plaintext "ingress.install"="true" \
-    --plaintext "ingress.namespace"="istio-system" \
-    --plaintext "ingress.labels"='{
-        "istio": "gateway"
-      }'
-  ```
-
-  And if using TLS...
-
-  ```bash
-  pulumi config set-all --path \
-    --plaintext "ingress.tls.enabled"="true" \
-    --plaintext "ingress.tls.commonName"="localhost" \
-    --plaintext "ingress.tls.issuerKind"="ClusterIssuer" \
-    --plaintext "ingress.tls.issuerName"="self-signed-issuer" \
-    --plaintext "ingress.tls.certSecretName"="ingress-cert" \
-    --plaintext "ingress.tls.hostnames[0]"="localhost.local"
-  ```
+    ```bash
+    cd ./k8s-lab/0-bootstrap/argocd
 
 
-## Misc
+## Notes
 
-### Monitoring
+### Secrets
 
-This project leverages the `kube-prometheus-stack` Helm chart to deploy multiple
-components (Prometheus operator, Prometheus instance, Grafana, etc.).
+Instead of storing plain `Secret` resources in the repo, all secrets are 
+encrypted as a `SealedSecret`.
 
 
-#### Discovering pods that are discoverable by Prometheus
+## TODO:
 
-This will find any pods with annotations containing `prometheus` in them. 
+  - Apply labels to each project (via. a transform?)
 
-Namely, we are looking for `prometheus.io/scrape` and `prometheus.io/port`.
-`
-```bash
- kubectl get svc -A -o json | jq '
-.items[]
-| select(.metadata.annotations // {} | to_entries | map(.key) | any(. | test(".*prometheus.*")))
-| {
-    name: .metadata.name,
-    namespace: .metadata.namespace,
-    annotations: .metadata.annotations
-  }
-'
+    ```ts
+    const labels = {
+      "app.kubernetes.io/tier": "infra",
+      "app.kubernetes.io/name": name,
+      "app.kubernetes.io/part-of": name,
+      "app.kubernetes.io/managed-by": "pulumi",
+    };
+    ```

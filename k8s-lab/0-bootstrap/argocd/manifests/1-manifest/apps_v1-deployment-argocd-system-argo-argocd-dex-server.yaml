@@ -1,0 +1,129 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"labels":{"app.kubernetes.io/component":"dex-server","app.kubernetes.io/instance":"argo","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"argocd-dex-server","app.kubernetes.io/part-of":"argocd","helm.sh/chart":"argo-cd-5.33.3"},"name":"argo-argocd-dex-server","namespace":"argocd-system"},"spec":{"replicas":1,"revisionHistoryLimit":3,"selector":{"matchLabels":{"app.kubernetes.io/instance":"argo","app.kubernetes.io/name":"argocd-dex-server"}},"template":{"metadata":{"annotations":{"checksum/cmd-params":"d6bad0f3e0cc408593019b50975960bc757d80fcbfa68de1149100ef50cb093b"},"labels":{"app.kubernetes.io/component":"dex-server","app.kubernetes.io/instance":"argo","app.kubernetes.io/managed-by":"Helm","app.kubernetes.io/name":"argocd-dex-server","app.kubernetes.io/part-of":"argocd","helm.sh/chart":"argo-cd-5.33.3"}},"spec":{"affinity":{"podAntiAffinity":{"preferredDuringSchedulingIgnoredDuringExecution":[{"podAffinityTerm":{"labelSelector":{"matchLabels":{"app.kubernetes.io/name":"argocd-dex-server"}},"topologyKey":"kubernetes.io/hostname"},"weight":100}]}},"containers":[{"args":["rundex"],"command":["/shared/argocd-dex","--logformat=text","--loglevel=info"],"env":[{"name":"ARGOCD_DEX_SERVER_DISABLE_TLS","valueFrom":{"configMapKeyRef":{"key":"dexserver.disable.tls","name":"argocd-cmd-params-cm","optional":true}}}],"image":"ghcr.io/dexidp/dex:v2.36.0","imagePullPolicy":"IfNotPresent","name":"dex-server","ports":[{"containerPort":5556,"name":"http","protocol":"TCP"},{"containerPort":5557,"name":"grpc","protocol":"TCP"},{"containerPort":5558,"name":"metrics","protocol":"TCP"}],"resources":{},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}},"volumeMounts":[{"mountPath":"/shared","name":"static-files"},{"mountPath":"/tmp","name":"dexconfig"},{"mountPath":"/tls","name":"argocd-dex-server-tls"}]}],"dnsPolicy":"ClusterFirst","initContainers":[{"args":["/bin/cp","-n","/usr/local/bin/argocd","/shared/argocd-dex"],"image":"quay.io/argoproj/argocd:v2.7.2","imagePullPolicy":"IfNotPresent","name":"copyutil","resources":{},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}},"volumeMounts":[{"mountPath":"/shared","name":"static-files"},{"mountPath":"/tmp","name":"dexconfig"}]}],"serviceAccountName":"argocd-dex-server","volumes":[{"emptyDir":{},"name":"static-files"},{"emptyDir":{},"name":"dexconfig"},{"name":"argocd-dex-server-tls","secret":{"items":[{"key":"tls.crt","path":"tls.crt"},{"key":"tls.key","path":"tls.key"},{"key":"ca.crt","path":"ca.crt"}],"optional":true,"secretName":"argocd-dex-server-tls"}}]}}}}
+  labels:
+    app.kubernetes.io/component: dex-server
+    app.kubernetes.io/instance: argo
+    app.kubernetes.io/managed-by: pulumi
+    app.kubernetes.io/name: argocd-dex-server
+    app.kubernetes.io/part-of: argocd
+    helm.sh/chart: argo-cd-5.33.3
+  name: argo-argocd-dex-server
+  namespace: argocd-system
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: argo
+      app.kubernetes.io/name: argocd-dex-server
+  template:
+    metadata:
+      annotations:
+        checksum/cmd-params: d6bad0f3e0cc408593019b50975960bc757d80fcbfa68de1149100ef50cb093b
+      labels:
+        app.kubernetes.io/component: dex-server
+        app.kubernetes.io/instance: argo
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: argocd-dex-server
+        app.kubernetes.io/part-of: argocd
+        helm.sh/chart: argo-cd-5.33.3
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: argocd-dex-server
+              topologyKey: kubernetes.io/hostname
+            weight: 100
+      containers:
+      - args:
+        - rundex
+        command:
+        - /shared/argocd-dex
+        - --logformat=text
+        - --loglevel=info
+        env:
+        - name: ARGOCD_DEX_SERVER_DISABLE_TLS
+          valueFrom:
+            configMapKeyRef:
+              key: dexserver.disable.tls
+              name: argocd-cmd-params-cm
+              optional: true
+        image: ghcr.io/dexidp/dex:v2.36.0
+        imagePullPolicy: IfNotPresent
+        name: dex-server
+        ports:
+        - containerPort: 5556
+          name: http
+          protocol: TCP
+        - containerPort: 5557
+          name: grpc
+          protocol: TCP
+        - containerPort: 5558
+          name: metrics
+          protocol: TCP
+        resources: {}
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          seccompProfile:
+            type: RuntimeDefault
+        volumeMounts:
+        - mountPath: /shared
+          name: static-files
+        - mountPath: /tmp
+          name: dexconfig
+        - mountPath: /tls
+          name: argocd-dex-server-tls
+      dnsPolicy: ClusterFirst
+      initContainers:
+      - args:
+        - /bin/cp
+        - -n
+        - /usr/local/bin/argocd
+        - /shared/argocd-dex
+        image: quay.io/argoproj/argocd:v2.7.2
+        imagePullPolicy: IfNotPresent
+        name: copyutil
+        resources: {}
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          seccompProfile:
+            type: RuntimeDefault
+        volumeMounts:
+        - mountPath: /shared
+          name: static-files
+        - mountPath: /tmp
+          name: dexconfig
+      serviceAccountName: argocd-dex-server
+      volumes:
+      - emptyDir: {}
+        name: static-files
+      - emptyDir: {}
+        name: dexconfig
+      - name: argocd-dex-server-tls
+        secret:
+          items:
+          - key: tls.crt
+            path: tls.crt
+          - key: tls.key
+            path: tls.key
+          - key: ca.crt
+            path: ca.crt
+          optional: true
+          secretName: argocd-dex-server-tls

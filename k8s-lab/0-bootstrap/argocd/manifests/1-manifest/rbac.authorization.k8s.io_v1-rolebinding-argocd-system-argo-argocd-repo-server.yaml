@@ -1,0 +1,23 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"rbac.authorization.k8s.io/v1","kind":"RoleBinding","metadata":{"labels":{"app.kubernetes.io/component":"repo-server","app.kubernetes.io/instance":"argo","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"argocd-repo-server","app.kubernetes.io/part-of":"argocd","helm.sh/chart":"argo-cd-5.33.3"},"name":"argo-argocd-repo-server","namespace":"argocd-system"},"roleRef":{"apiGroup":"rbac.authorization.k8s.io","kind":"Role","name":"argo-argocd-repo-server"},"subjects":[{"kind":"ServiceAccount","name":"argo-argocd-repo-server","namespace":"argocd-system"}]}
+  labels:
+    app.kubernetes.io/component: repo-server
+    app.kubernetes.io/instance: argo
+    app.kubernetes.io/managed-by: pulumi
+    app.kubernetes.io/name: argocd-repo-server
+    app.kubernetes.io/part-of: argocd
+    helm.sh/chart: argo-cd-5.33.3
+  name: argo-argocd-repo-server
+  namespace: argocd-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: argo-argocd-repo-server
+subjects:
+- kind: ServiceAccount
+  name: argo-argocd-repo-server
+  namespace: argocd-system

@@ -1,0 +1,22 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"policy/v1","kind":"PodDisruptionBudget","metadata":{"labels":{"app":"istiod","app.kubernetes.io/managed-by":"pulumi","install.operator.istio.io/owning-resource":"unknown","istio":"pilot","istio.io/rev":"default","operator.istio.io/component":"Pilot","release":"istiod"},"name":"istiod","namespace":"istio-system"},"spec":{"minAvailable":1,"selector":{"matchLabels":{"app":"istiod","istio":"pilot"}}}}
+  labels:
+    app: istiod
+    app.kubernetes.io/managed-by: pulumi
+    install.operator.istio.io/owning-resource: unknown
+    istio: pilot
+    istio.io/rev: default
+    operator.istio.io/component: Pilot
+    release: istiod
+  name: istiod
+  namespace: istio-system
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: istiod
+      istio: pilot

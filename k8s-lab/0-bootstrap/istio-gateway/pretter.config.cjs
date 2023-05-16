@@ -1,0 +1,1 @@
+../../__shared/pretter.config.cjs

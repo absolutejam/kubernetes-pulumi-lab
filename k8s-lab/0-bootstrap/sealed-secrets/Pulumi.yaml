@@ -1,0 +1,3 @@
+name: sealed-secrets
+runtime: nodejs
+description: Deploys Sealed Secrets to enable secure encryption of secrets in git

@@ -1,0 +1,3 @@
+name: istio
+runtime: nodejs
+description: Deploys Istio service mesh

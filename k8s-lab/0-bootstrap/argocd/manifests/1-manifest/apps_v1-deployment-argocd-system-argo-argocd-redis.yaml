@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"labels":{"app.kubernetes.io/component":"redis","app.kubernetes.io/instance":"argo","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"argocd-redis","app.kubernetes.io/part-of":"argocd","helm.sh/chart":"argo-cd-5.33.3"},"name":"argo-argocd-redis","namespace":"argocd-system"},"spec":{"replicas":1,"revisionHistoryLimit":3,"selector":{"matchLabels":{"app.kubernetes.io/name":"argocd-redis"}},"template":{"metadata":{"labels":{"app.kubernetes.io/component":"redis","app.kubernetes.io/instance":"argo","app.kubernetes.io/managed-by":"Helm","app.kubernetes.io/name":"argocd-redis","app.kubernetes.io/part-of":"argocd","helm.sh/chart":"argo-cd-5.33.3"}},"spec":{"affinity":{"podAntiAffinity":{"preferredDuringSchedulingIgnoredDuringExecution":[{"podAffinityTerm":{"labelSelector":{"matchLabels":{"app.kubernetes.io/name":"argocd-redis"}},"topologyKey":"kubernetes.io/hostname"},"weight":100}]}},"containers":[{"args":["--save","","--appendonly","no"],"image":"public.ecr.aws/docker/library/redis:7.0.11-alpine","imagePullPolicy":"IfNotPresent","name":"redis","ports":[{"containerPort":6379,"name":"redis","protocol":"TCP"}],"resources":{},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]}}}],"dnsPolicy":"ClusterFirst","securityContext":{"runAsNonRoot":true,"runAsUser":999,"seccompProfile":{"type":"RuntimeDefault"}},"serviceAccountName":"default"}}}}
+  labels:
+    app.kubernetes.io/component: redis
+    app.kubernetes.io/instance: argo
+    app.kubernetes.io/managed-by: pulumi
+    app.kubernetes.io/name: argocd-redis
+    app.kubernetes.io/part-of: argocd
+    helm.sh/chart: argo-cd-5.33.3
+  name: argo-argocd-redis
+  namespace: argocd-system
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: argocd-redis
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: redis
+        app.kubernetes.io/instance: argo
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: argocd-redis
+        app.kubernetes.io/part-of: argocd
+        helm.sh/chart: argo-cd-5.33.3
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: argocd-redis
+              topologyKey: kubernetes.io/hostname
+            weight: 100
+      containers:
+      - args:
+        - --save
+        - ""
+        - --appendonly
+        - "no"
+        image: public.ecr.aws/docker/library/redis:7.0.11-alpine
+        imagePullPolicy: IfNotPresent
+        name: redis
+        ports:
+        - containerPort: 6379
+          name: redis
+          protocol: TCP
+        resources: {}
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+      dnsPolicy: ClusterFirst
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: default

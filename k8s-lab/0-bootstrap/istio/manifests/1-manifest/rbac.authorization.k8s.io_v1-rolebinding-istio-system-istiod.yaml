@@ -1,0 +1,20 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"rbac.authorization.k8s.io/v1","kind":"RoleBinding","metadata":{"labels":{"app":"istiod","app.kubernetes.io/managed-by":"pulumi","release":"istiod"},"name":"istiod","namespace":"istio-system"},"roleRef":{"apiGroup":"rbac.authorization.k8s.io","kind":"Role","name":"istiod"},"subjects":[{"kind":"ServiceAccount","name":"istiod","namespace":"istio-system"}]}
+  labels:
+    app: istiod
+    app.kubernetes.io/managed-by: pulumi
+    release: istiod
+  name: istiod
+  namespace: istio-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: istiod
+subjects:
+- kind: ServiceAccount
+  name: istiod
+  namespace: istio-system
