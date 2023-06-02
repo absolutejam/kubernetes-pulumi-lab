@@ -1,0 +1,4 @@
+encryptionsalt: v1:SsuTcsljGS0=:v1:cJG5CGFKKDjlWSQi:b8ze/pBqSad7tVyNL2qe96lEHTCd7Q==
+config:
+  kubernetes-lab:org: absolutejam
+  kubernetes:renderYamlToDirectory: ./manifests

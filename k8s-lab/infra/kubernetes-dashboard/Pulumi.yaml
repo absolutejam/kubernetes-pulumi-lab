@@ -1,0 +1,3 @@
+name: kubernetes-dashboard
+runtime: nodejs
+description: Deploys Kubernetes Dashboard

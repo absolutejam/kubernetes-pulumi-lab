@@ -1,0 +1,3 @@
+name: cluster-certs
+runtime: nodejs
+description: Deploys cluster certificate resources

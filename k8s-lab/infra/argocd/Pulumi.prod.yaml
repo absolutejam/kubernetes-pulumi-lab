@@ -1,0 +1,6 @@
+encryptionsalt: v1:iXyKYoivYr0=:v1:+0DRbNQlnc01U6It:9Vvv4SzNPKLsZdxXat1CH0xCoP8h6Q==
+config:
+  argocd:argocd:
+    version: 5.34.6
+  'kubernetes-lab:org': absolutejam
+  'kubernetes:renderYamlToDirectory': ./manifests

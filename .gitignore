@@ -3,3 +3,9 @@
 **/.state/
 !**/.state/.gitignore
 public/
+./tmp/**
+**/manifests/**
+.DS_Store
+secrets/**
+!secrets/certs/
+!secrets/**/.gitignore

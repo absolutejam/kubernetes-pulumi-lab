@@ -1,0 +1,4 @@
+encryptionsalt: v1:kxgR9pBxuqc=:v1:waMzSrupCbrFP8MS:PwhS+lpjmEO3Fa/t1i0uKQwai4uVtA==
+config:
+  argo-applications:argo-applications: '{"services":[{"name":"gitea","namespace":"gitea","repoPath":"infra-manifests/gitea.git"},{"name":"woodpecker","namespace":"woodpecker","repoPath":"infra-manifests/woodpecker.git"}]}'
+  kubernetes:renderYamlToDirectory: ./manifests

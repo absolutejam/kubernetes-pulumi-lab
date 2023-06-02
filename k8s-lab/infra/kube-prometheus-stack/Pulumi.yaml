@@ -1,0 +1,3 @@
+name: kube-prometheus-stack
+runtime: nodejs
+description: Deploys the Kube Prometheus Stack for monitoring

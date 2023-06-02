@@ -1,0 +1,5 @@
+encryptionsalt: v1:O/sXSNeNgdY=:v1:7N0eTHBmUC7fVYSP:yJpXlNokEq0RD/XCf1CLJiP/mzc50A==
+config:
+  cert-manager:trust-manager: '{"version":"v0.4.0"}'
+  kubernetes-lab:org: absolutejam
+  kubernetes:renderYamlToDirectory: ./manifests

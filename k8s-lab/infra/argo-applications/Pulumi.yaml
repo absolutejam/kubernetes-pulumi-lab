@@ -1,0 +1,3 @@
+name: argo-applications
+runtime: nodejs
+description: Deploys ArgoCD Application resources for other applications & services

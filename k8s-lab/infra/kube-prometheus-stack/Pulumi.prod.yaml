@@ -1,0 +1,3 @@
+encryptionsalt: v1:kyBi1ijL+k4=:v1:ovVZHfqlJj8jnXa8:GpLURCQxdERBSoye2+XvcfrRFJ79Iw==
+config:
+  kubernetes:renderYamlToDirectory: ./manifests

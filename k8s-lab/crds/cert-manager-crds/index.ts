@@ -14,11 +14,13 @@ utilities.lazyLoad(exports, ["Provider"], () => require("./provider"));
 // Export sub-modules:
 import * as acme from "./acme";
 import * as certmanager from "./certmanager";
+import * as trust from "./trust";
 import * as types from "./types";
 
 export {
     acme,
     certmanager,
+    trust,
     types,
 };
 pulumi.runtime.registerResourcePackage("crds", {
