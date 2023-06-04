@@ -309,7 +309,7 @@ export class KubePrometheusStack extends pulumi.ComponentResource {
               route: [
                 {
                   destination: {
-                    host: `prom-prometheus.observability.svc.cluster.local`,
+                    host: `prom-prometheus.${namespace}.svc.cluster.local`,
                     port: { number: 9090 },
                   },
                 },

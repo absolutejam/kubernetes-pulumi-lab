@@ -1,4 +1,4 @@
-encryptionsalt: v1:O/sXSNeNgdY=:v1:7N0eTHBmUC7fVYSP:yJpXlNokEq0RD/XCf1CLJiP/mzc50A==
+encryptionsalt: v1:TS8/OQWr9L4=:v1:bZNgFQe5hVs/VkA1:Gv4HlacxvVIRCeA46/P4a2f6guxbWg==
 config:
   cert-manager:trust-manager: '{"version":"v0.4.0"}'
   kubernetes-lab:org: absolutejam

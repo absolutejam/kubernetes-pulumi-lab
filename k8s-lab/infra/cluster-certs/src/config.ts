@@ -13,7 +13,7 @@ export const config = Config.parse({
   instance,
   manifestsDirectory,
 
-  selfSignedIssuer: pulumiConfig.getObject("self-signed-issuer"),
+  certsConfig: pulumiConfig.getObject("self-signed-issuer"),
   secrets: pulumiConfig
     .requireSecretObject("secrets")
     .apply(SelfSignedIssuerSecretsConfigValidated.parse),

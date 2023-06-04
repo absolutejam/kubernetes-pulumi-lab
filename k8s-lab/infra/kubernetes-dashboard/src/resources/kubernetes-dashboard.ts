@@ -18,7 +18,7 @@ export class KubernetesDashboard extends pulumi.ComponentResource {
 
   constructor(
     { namespace, version }: KubernetesDashboardConfig,
-    opts?: pulumi.ComponentResourceOptions
+    opts?: pulumi.ComponentResourceOptions,
   ) {
     const name = "kubernetes-dashboard";
 
@@ -29,7 +29,7 @@ export class KubernetesDashboard extends pulumi.ComponentResource {
       {
         metadata: { name: namespace },
       },
-      { parent: this }
+      { parent: this },
     );
 
     this.kubernetesDashboard = new kubernetes.helm.v3.Chart(
@@ -64,7 +64,7 @@ export class KubernetesDashboard extends pulumi.ComponentResource {
       {
         parent: this.namespace,
         dependsOn: [this.namespace],
-      }
+      },
     );
 
     this.application = new Application(
@@ -78,7 +78,7 @@ export class KubernetesDashboard extends pulumi.ComponentResource {
           project: "default",
           source: {
             repoURL:
-              "https://k8s-lab.local/gitea/gitea-admin/kubernetes-dashboard.git",
+              "https://k8s-lab.local/infra-manifests/kubernetes-dashboard.git",
             targetRevision: "HEAD",
             path: ".",
             directory: { recurse: true },
@@ -96,7 +96,7 @@ export class KubernetesDashboard extends pulumi.ComponentResource {
           },
         },
       },
-      { parent: this }
+      { parent: this },
     );
 
     this.serviceAccount = new kubernetes.core.v1.ServiceAccount(
@@ -107,7 +107,7 @@ export class KubernetesDashboard extends pulumi.ComponentResource {
           namespace,
         },
       },
-      { parent: this.namespace, dependsOn: [this.namespace] }
+      { parent: this.namespace, dependsOn: [this.namespace] },
     );
 
     this.clusterRoleBinding = new kubernetes.rbac.v1.ClusterRoleBinding(
@@ -130,7 +130,7 @@ export class KubernetesDashboard extends pulumi.ComponentResource {
           },
         ],
       },
-      { parent: this }
+      { parent: this },
     );
 
     this.tokenSecret = new kubernetes.core.v1.Secret(
@@ -145,7 +145,7 @@ export class KubernetesDashboard extends pulumi.ComponentResource {
           },
         },
       },
-      { parent: this.namespace }
+      { parent: this.namespace },
     );
 
     this.virtualService = new VirtualService(
@@ -166,7 +166,7 @@ export class KubernetesDashboard extends pulumi.ComponentResource {
               route: [
                 {
                   destination: {
-                    host: `kubernetes-dashboard.observability-kubernetes-dashboard.svc.cluster.local`,
+                    host: `kubernetes-dashboard.${namespace}.svc.cluster.local`,
                     port: { number: 443 },
                   },
                 },
@@ -175,7 +175,7 @@ export class KubernetesDashboard extends pulumi.ComponentResource {
           ],
         },
       },
-      { parent: this.namespace }
+      { parent: this.namespace },
     );
   }
 }

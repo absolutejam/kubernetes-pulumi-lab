@@ -1,5 +1,5 @@
-encryptionsalt: v1:jllaXo/NvQc=:v1:G7ZwpIjXrcWW1xtO:QjTeiNoKlkbENGIKyo9bZ+lmWuwutA==
+encryptionsalt: v1:Kj05rNbqIto=:v1:qsA5EIETbFkKAxzD:rwsMCUlqF6l19rnOhWGK7I8j7nFuRQ==
 config:
   Woodpecker:woodpecker-secrets:
-    secure: v1:cnQnirpwP5A16S+g:ke4qY6/dv53Pe0dt+DAgD43jlGs8QsmIv3cMyIDWkUmIbebIJVmvHgx4cgyekAhFlMpn3bn5CmHQ8Z1PP1bCWVuafZvvQ7cOlOaLwdSSk8LjtisCQqdfv2OmwdEeBk7erLbwEX2CBIgyiPzYEo1napIRIUjl38yJLtNt2mVwuytv+J4mVU+aEN9ZX5Wi3dC+eahnlAGs6adIpZgILdb2Jf4+e7d/WaYv5gLKBj3HkhiUjXlJPyJ8/8wbkZmiKEaTQVlY/WDCJz6rauwvy76sNDUs6ACXKluEwEo=
+    secure: v1:CfCGo2iRwxie7M7b:Pu6g1se8DzqlVPBxx76spoXi2sKJvFLI/AcBnCbo0cVJ+XD/F8ZDG2kjCzX8ba3nCgycRiL2x3AOgVq4ssqFIaZqdGhRyaMYa3GcnekxNOYoDRFZSGjBvg5FcBAWB9csEYLd5tOkX51yneEy4B1vrI8Sw2IBe5a+B+3lNOMdxrjrch6ee2929umRqmuPWS1/KjBfBOFsyIxDJC+OswM63dGugLsg8J0MCrPWy3utMAazVrGClUaScbehwE2zb+LwX5L0xz0UKRV+3Qpk0ioDVh78ED58/p20ZVI=
   kubernetes:renderYamlToDirectory: ./manifests

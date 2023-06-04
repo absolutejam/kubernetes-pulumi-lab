@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const KubernetesDashboardConfig = z.object({
   version: z.string().optional(),
-  namespace: z.string().default("observability-kubernetes-dashboard"),
+  namespace: z.string().default("kubernetes-dashboard"),
 });
 
 export type KubernetesDashboardConfig = z.infer<
