@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+export LABBY_CWD=.. 
+go run main.go ${@}

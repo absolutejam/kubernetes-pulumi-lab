@@ -1,0 +1,46 @@
+cluster: lab
+pulumi_passphrase: waffle123!
+
+project_roots:
+  - k8s-lab/infra
+
+project_opts:
+    - name: cert-manager
+      wait_for:
+        - namespace: cert-manager-system
+          condition: available
+          resource: deploy/cert-manager-webhook
+
+    - name: trust-manager
+      wait_for:
+        - namespace: trust-manager-system
+          condition: available
+          resource: deploy/trust-manager
+
+    - name: gitea
+      wait_for:
+        - namespace: gitea
+          condition: ready
+          resource: statefulset/gitea
+
+# Don't encrypt secrets for the following projects
+skip_encrypt:
+  - sealed-secrets
+
+bootstrap:
+  default:
+    - project: sealed-secrets
+    - project: reflector
+    - project: cert-manager
+    - project: trust-manager
+    - project: cluster-certs
+    - project: istio
+    - project: istio-gateway
+    - project: argocd
+    - project: gitea
+    - project: woodpecker
+
+  observability:
+    - project: kube-prometheus-stack
+    - project: kubernetes-dashboard
+
