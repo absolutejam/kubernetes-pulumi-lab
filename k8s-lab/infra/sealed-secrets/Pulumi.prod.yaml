@@ -1,4 +1,4 @@
-encryptionsalt: v1:DMyMEfINW4E=:v1:oh57bUJpeJkfHv61:PB/xBalDYr/af0M6RjAa3FL7yrEWlg==
+encryptionsalt: v1:a+4ZCjhXX48=:v1:k/xHO/T2zM6/v5sO:+pa+FnkfFsBk6R5BZ5mMDCYc4dfEXQ==
 config:
   kubernetes-lab:org: absolutejam
   kubernetes:renderYamlToDirectory: ./manifests

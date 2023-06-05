@@ -1,4 +1,4 @@
-encryptionsalt: v1:KRHHcj9/HoE=:v1:bRZ3+AZO3pDJ9t5G:v2g2/FvGR8ekjVgwfDWzYjC1FvqDkQ==
+encryptionsalt: v1:c1IIS82DxwM=:v1:11xsroPfM1kRaFf2:G3xZ8/Qy+5DxHYuFLX7PfYf9in/gtQ==
 config:
   argocd:argocd: '{"version":"5.34.6"}'
   kubernetes-lab:org: absolutejam

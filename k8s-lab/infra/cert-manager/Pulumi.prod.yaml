@@ -1,3 +1,3 @@
-encryptionsalt: v1:pib5b2D0HKM=:v1:Ujbb4lZPlNJqpnFb:Z921w/jZcYl2kxJmaJ640TzU7a86aA==
+encryptionsalt: v1:X3uzj3BRwXQ=:v1:HpMqxQUsLO8Rr0SM:3JEIwOVyZmczPK/zuBYSDsZBSB7H9Q==
 config:
   kubernetes:renderYamlToDirectory: ./manifests
