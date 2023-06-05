@@ -183,13 +183,12 @@ func Build(opts buildopts.Opts) {
 		}
 
 		if opts.Project.Opts != nil && len(opts.Project.Opts.WaitFor) > 0 {
-			timeout := "30s" // TODO:
 			log.Infof("Waiting for %d resources", len(opts.Project.Opts.WaitFor))
 			for _, waitFor := range opts.Project.Opts.WaitFor {
 				log.Info(
 					fmt.Sprintf("Waiting for %s", waitFor.Resource),
 					"namespace", waitFor.Namespace,
-					"timeout", timeout,
+					"timeout", waitFor.Timeout,
 				)
 
 				err := kubectl.WaitFor(kubectlwaitforopts.Opts{
@@ -197,7 +196,7 @@ func Build(opts buildopts.Opts) {
 					Resource:  waitFor.Resource,
 					Condition: waitFor.Condition,
 					Namespace: waitFor.Namespace,
-					Timeout:   timeout,
+					Timeout:   waitFor.Timeout,
 				})
 				if err != nil {
 					log.Fatal(err)

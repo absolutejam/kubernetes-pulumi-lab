@@ -70,7 +70,7 @@ func ProvisionRepos(token string, opts provisionrepoopts.Opts) error {
 	basicClient, err := gitea.NewClient(
 		"https://k8s-lab.local/gitea/",
 		gitea.SetHTTPClient(httpClient()),
-		gitea.SetToken(token)
+		gitea.SetToken(token),
 	)
 
 	if err != nil {

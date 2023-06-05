@@ -10,18 +10,21 @@ project_opts:
         - namespace: cert-manager-system
           condition: available
           resource: deploy/cert-manager-webhook
+          timeout: 2m
 
     - name: trust-manager
       wait_for:
         - namespace: trust-manager-system
           condition: available
           resource: deploy/trust-manager
+          timeout: 2m
 
     - name: gitea
       wait_for:
         - namespace: gitea
           condition: ready
           resource: statefulset/gitea
+          timeout: 8m
 
 # Don't encrypt secrets for the following projects
 skip_encrypt:

@@ -19,6 +19,7 @@ type WaitFor struct {
 	Namespace string
 	Condition string
 	Resource  string
+	Timeout   string
 }
 
 type ProjectOptsConfig struct {
@@ -127,6 +128,7 @@ var Get = func() *Config {
 	)
 
 	if !loaded {
+		// TODO: validate config
 		err := viper.Unmarshal(
 			config,
 			viper.DecodeHook(

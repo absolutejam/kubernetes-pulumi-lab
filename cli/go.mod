@@ -8,7 +8,6 @@ require (
 	github.com/charmbracelet/bubbletea v0.24.0
 	github.com/charmbracelet/lipgloss v0.7.1
 	github.com/charmbracelet/log v0.2.2
-	github.com/mcuadros/go-defaults v1.2.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/pulumi/pulumi/sdk/v3 v3.68.0
 	github.com/sanity-io/litter v1.5.5
