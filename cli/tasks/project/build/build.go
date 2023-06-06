@@ -114,7 +114,7 @@ func Build(opts buildopts.Opts) {
 	)
 
 	log.Debugf("Loading stack: %s", stackName)
-	stack, err := auto.SelectStackLocalSource(
+	stack, err := auto.UpsertStackLocalSource(
 		ctx,
 		stackName,
 		opts.Project.Path,
