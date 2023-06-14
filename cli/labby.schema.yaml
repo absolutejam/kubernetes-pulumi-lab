@@ -1,0 +1,82 @@
+---
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: Labby config
+description: A product in the catalog
+type: object
+components:
+  schemas:
+    ProjectOpt:
+      description: Directories in which to discover projects
+      type: object
+      properties:
+        name:
+          type: string
+        wait_for:
+          type: array
+          items:
+            "$ref": "#/components/schemas/WaitFor"
+      required:
+        - name
+    WaitFor:
+      description: The resource to wait for
+      type: object
+      properties:
+        namespace:
+          type: string
+        condition:
+          type: string
+        resource:
+          type: string
+        timeout:
+          type: string
+      required:
+        - namespace
+        - condition
+        - resource
+    BootstrapGroupProject:
+      description: The bootstrap group
+      type: object
+      properties:
+        project:
+          type: string
+        wait_for:
+          type: array
+          items:
+            "$ref": "#/components/schemas/WaitFor"
+        stack:
+          type: string
+      required:
+        - project
+properties:
+  cluster:
+    description: The Kubernetes cluster
+    type: string
+  pulumi_passphrase:
+    description: Password to decrypt Pulumi secrets
+    type: string
+  project_roots:
+    description: Directories in which to discover projects
+    type: array
+    items:
+      type: string
+    minItems: 1
+    uniqueItems: true
+  project_opts:
+    type: array
+    items:
+      "$ref": "#/components/schemas/ProjectOpt"
+  skip_encrypt:
+    type: array
+    items:
+      type: string
+  bootstrap:
+    type: object
+    additionalProperties:
+      type: array
+      items:
+        "$ref": "#/components/schemas/BootstrapGroupProject"
+    
+required:
+  - cluster
+  - pulumi_passphrase
+  - project_roots
